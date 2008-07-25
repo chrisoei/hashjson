@@ -1,4 +1,4 @@
-#define CKO_MULTIDIGEST_VERSION	"1.2"
+#define CKO_MULTIDIGEST_VERSION	"1.3"
 #include <stdio.h>
 #include <global.h>
 #include <md5.h>
@@ -12,7 +12,7 @@ typedef struct {
   MD5_CTX md5_ctx;
   sha1_context sha1_ctx;
   sha512_ctx sha512_ctx;
-  ripemd160_ctx_ptr ripemd160_ctx;
+  ripemd160_ctx_t ripemd160_ctx;
   unsigned long adler32;
   unsigned long crc32;
   unsigned long size;
@@ -29,8 +29,7 @@ void cko_multidigest_init(cko_multidigest_ptr x) {
   sha512_init(&(x->sha512_ctx));
   x->adler32 = 1L;
   crcFastInit(&(x->crc32));
-  x->ripemd160_ctx = (ripemd160_ctx_ptr) malloc(sizeof(ripemd160_ctx_t));
-  MDinit(x->ripemd160_ctx);
+  MDinit(&(x->ripemd160_ctx));
 }
 
 // CKODEBUG FIXIT: is unsigned int big enough?
@@ -44,12 +43,14 @@ void cko_multidigest_update(cko_multidigest_ptr x,unsigned char* s,unsigned int 
   sha512_update(&(x->sha512_ctx),s,l);
   x->adler32 = update_adler32(x->adler32,s,l); // note that this take int, not uint
   crcFastUpdate(&(x->crc32),s,l);
+  ripemd160_update(&(x->ripemd160_ctx),s,l);
 }
 
 void cko_multidigest_final(cko_multidigest_ptr x) {
-  unsigned char d_md5[16];
+  unsigned char d_md5[18];
   unsigned char d_sha1[20];
   unsigned char d_sha512[64];
+  unsigned char d_ripemd160[160/8];
   int i;
   int len;
   static const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -66,6 +67,8 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
     printf("%02x",(int)d_md5[i]);
   }
   printf("\nMD5 base 64: ");
+  d_md5[16] = 0;
+  d_md5[17] = 0;
   for (i=0;i<16;i+=3) {
     len = 16 - i;
     if (len > 3) len = 3;
@@ -82,9 +85,20 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   for (i=0;i<64;i++) {
     printf("%02x",(int)d_sha512[i]);
   }
+  MDfinish(&(x->ripemd160_ctx),"");
+
+  for (i=0;i<20;i+=4 ) {
+    d_ripemd160[i] = x->ripemd160_ctx.MDbuf[i>>2];
+    d_ripemd160[i+1] = (x->ripemd160_ctx.MDbuf[i>>2]>>8);
+    d_ripemd160[i+2] = (x->ripemd160_ctx.MDbuf[i>>2]>>16);
+    d_ripemd160[i+3] = (x->ripemd160_ctx.MDbuf[i>>2]>>24);
+  }
+  printf("\nRIPEM160: ");
+  for (i=0;i<20;i++) {
+    printf("%02x",d_ripemd160[i]);
+  }
   printf("\nSize: %lu",x->size);
   printf("\nVersion: %s\n",CKO_MULTIDIGEST_VERSION);
-  free(x->ripemd160_ctx->MDbuf);
 }
 
 void cko_multidigest_file(char* f) {
@@ -113,6 +127,7 @@ void cko_multidigest_file(char* f) {
 
   cko_multidigest_final(&m);
   fclose(fp);
+  free(dat);
 }
 
 void cko_multidigest_string(char* s) {

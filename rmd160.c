@@ -44,11 +44,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include "rmd160.h"      
+#include <assert.h>
 
 /********************************************************************/
 
 void MDinit(ripemd160_ctx_ptr ctx)
 {
+   assert(sizeof(dword)==32/8);
+   assert(sizeof(byte)==8/8);
+   ctx->polished = 0;
+   ctx->length[0] = 0;
+   ctx->length[1] = 0;
    ctx->MDbuf[0] = 0x67452301UL;
    ctx->MDbuf[1] = 0xefcdab89UL;
    ctx->MDbuf[2] = 0x98badcfeUL;
@@ -57,6 +63,29 @@ void MDinit(ripemd160_ctx_ptr ctx)
 
    return;
 }
+
+/********************************************************************/
+
+void ripemd160_update(ripemd160_ctx_ptr x, unsigned char* s, unsigned int l)
+{
+  unsigned int i;
+  dword nbytes;
+  dword myx[16];
+  for (nbytes=l; nbytes>63; nbytes -=64) {
+    for (i=0;i<16;i++) {
+      myx[i] = BYTES_TO_DWORD(s);
+      s += 4;
+    }
+    compress(x,myx);
+  }
+  if (x->length[0] + l < x->length[0]) /* overflow to msb */
+    x->length[1]++;
+  x->length[0] += l;
+  if (nbytes>0) {
+    MDfinish(x,s);
+  }
+}
+
 
 /********************************************************************/
 
@@ -260,31 +289,36 @@ void compress(ripemd160_ctx_ptr ctx, dword *X)
 
 /********************************************************************/
 
-void MDfinish(ripemd160_ctx_ptr ctx, byte *strptr, dword lswlen, dword mswlen)
+void MDfinish(ripemd160_ctx_ptr ctx, byte *strptr)
 {
    unsigned int i;                                 /* counter       */
    dword        X[16];                             /* message words */
+   dword offset;
+
+   if (ctx->polished) return;
+   ctx->polished++;
+   offset = ctx->length[0] & 0x3c0;
 
    memset(X, 0, 16*sizeof(dword));
 
    /* put bytes from strptr into X */
-   for (i=0; i<(lswlen&63); i++) {
+   for (i=0; i<(ctx->length[0]&63); i++) {
       /* byte i goes into word X[i div 4] at pos.  8*(i mod 4)  */
       X[i>>2] ^= (dword) *strptr++ << (8 * (i&3));
    }
 
    /* append the bit m_n == 1 */
-   X[(lswlen>>2)&15] ^= (dword)1 << (8*(lswlen&3) + 7);
+   X[(ctx->length[0]>>2)&15] ^= (dword)1 << (8*(ctx->length[0]&3) + 7);
 
-   if ((lswlen & 63) > 55) {
+   if ((ctx->length[0] & 63) > 55) {
       /* length goes to next block */
       compress(ctx, X);
       memset(X, 0, 16*sizeof(dword));
    }
 
    /* append length in bits*/
-   X[14] = lswlen << 3;
-   X[15] = (lswlen >> 29) | (mswlen << 3);
+   X[14] = ctx->length[0] << 3;
+   X[15] = (ctx->length[0] >> 29) | (ctx->length[1] << 3);
    compress(ctx, X);
 
    return;
