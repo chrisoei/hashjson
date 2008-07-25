@@ -55,6 +55,8 @@ typedef    unsigned long        dword;
 
 typedef struct {
   dword MDbuf[160/32];
+  dword length[2];
+  int polished;
 } ripemd160_ctx_t,*ripemd160_ctx_ptr;
 
 /********************************************************************/
@@ -140,13 +142,16 @@ void MDinit(ripemd160_ctx_ptr ctx);
  *  initializes MDbuffer to "magic constants"
  */
 
+void ripemd160_update(ripemd160_ctx_ptr x, unsigned char* s, unsigned int l);
+
+
 void compress(ripemd160_ctx_ptr ctx, dword *X);
 /*
  *  the compression function.
  *  transforms MDbuf using message bytes X[0] through X[15]
  */
 
-void MDfinish(ripemd160_ctx_ptr ctx, byte *strptr, dword lswlen, dword mswlen);
+void MDfinish(ripemd160_ctx_ptr ctx, byte *strptr);
 /*
  *  puts bytes from strptr into X and pad out; appends length 
  *  and finally, compresses the last block(s)
