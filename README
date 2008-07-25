@@ -1,0 +1,6 @@
+cko-multidigest performs a variety of hashes on a string of file.
+
+Usage:
+cko-multidigest -s mystring
+cko-multidigest myfile
+
