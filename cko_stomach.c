@@ -5,12 +5,14 @@
 #include <sha1.h>
 #include <sha2.h>
 #include <string.h>
+#include <rmd160.h>
 
 typedef struct {
   int chunksize;
   MD5_CTX md5_ctx;
   sha1_context sha1_ctx;
   sha512_ctx sha512_ctx;
+  ripemd160_ctx_ptr ripemd160_ctx;
   unsigned long adler32;
   unsigned long crc32;
   unsigned long size;
@@ -27,6 +29,8 @@ void cko_multidigest_init(cko_multidigest_ptr x) {
   sha512_init(&(x->sha512_ctx));
   x->adler32 = 1L;
   crcFastInit(&(x->crc32));
+  x->ripemd160_ctx = (ripemd160_ctx_ptr) malloc(sizeof(ripemd160_ctx_t));
+  MDinit(x->ripemd160_ctx);
 }
 
 // CKODEBUG FIXIT: is unsigned int big enough?
@@ -80,6 +84,7 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   }
   printf("\nSize: %lu",x->size);
   printf("\nVersion: %s\n",CKO_MULTIDIGEST_VERSION);
+  free(x->ripemd160_ctx->MDbuf);
 }
 
 void cko_multidigest_file(char* f) {
