@@ -1,4 +1,4 @@
-CFLAGS=-g -O2 -I.
+CFLAGS=-O2 -I.
 
 all: cko-multidigest test
 
