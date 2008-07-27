@@ -3,7 +3,12 @@
 x="$1"
 crc32=`cko-multidigest "$x" | grep 'CRC32:' | awk '{print $2}'|tr '[a-z]' '[A-Z]'`
 
-spacer='_'
+if [ -z "$2" ]
+then
+  spacer=' '
+else
+  spacer="$2"
+fi
 
 if [ ! -z "$crc32" ]
 then
