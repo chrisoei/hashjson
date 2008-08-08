@@ -5,7 +5,12 @@ crc32=`cko-multidigest "$x" | grep 'CRC32:' | awk '{print $2}'|tr '[a-z]' '[A-Z]
 
 if [ -z "$2" ]
 then
-  spacer=' '
+  if [[ $x =~ ' ' ]]
+  then
+    spacer=' '
+  else
+    spacer='_'
+  fi
 else
   spacer="$2"
 fi
