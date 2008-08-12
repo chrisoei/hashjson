@@ -1,4 +1,4 @@
-#define CKO_MULTIDIGEST_VERSION	"1.3"
+#define CKO_MULTIDIGEST_VERSION	"1.4"
 #include <stdio.h>
 #include <global.h>
 #include <md5.h>
@@ -93,7 +93,7 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
     d_ripemd160[i+2] = (x->ripemd160_ctx.MDbuf[i>>2]>>16);
     d_ripemd160[i+3] = (x->ripemd160_ctx.MDbuf[i>>2]>>24);
   }
-  printf("\nRIPEM160: ");
+  printf("\nRIPEMD160: ");
   for (i=0;i<20;i++) {
     printf("%02x",d_ripemd160[i]);
   }
@@ -105,6 +105,7 @@ void cko_multidigest_file(char* f) {
   FILE* fp;
   if (f!=NULL) {
     fp=fopen(f,"r");
+    printf("Filename: %s\n",f);
   } else {
     fp=stdin;
   }
@@ -124,7 +125,6 @@ void cko_multidigest_file(char* f) {
   while((nbytes=fread(dat,1,m.chunksize,fp))>0) {
     cko_multidigest_update(&m,dat,nbytes);
   }
-
   cko_multidigest_final(&m);
   fclose(fp);
   free(dat);
