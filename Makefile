@@ -26,8 +26,10 @@ rmd160.o: rmd160.h rmd160.c
 test: cko-multidigest
 	./cko-multidigest test_vectors/vector1 > test_vectors/vector1.test
 	./cko-multidigest test_vectors/vector2 > test_vectors/vector2.test
+	./cko-multidigest test_vectors/vector2b > test_vectors/vector2b.test
 	./cko-multidigest test_vectors/vector3 > test_vectors/vector3.test
 	diff test_vectors/vector1.test test_vectors/vector1.reference
 	diff test_vectors/vector2.test test_vectors/vector2.reference
+	diff test_vectors/vector2b.test test_vectors/vector2b.reference
 	diff test_vectors/vector3.test test_vectors/vector3.reference
 
