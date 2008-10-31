@@ -1,9 +1,9 @@
-CFLAGS=-O2 -I. -lsqlite3
+CFLAGS=-O2 -I.
 
 all: cko-multidigest
 
 cko-multidigest: sha1.o sha2.o md5c.o adler32.o crc.o rmd160.o cko_stomach.c
-	gcc $(CFLAGS) -o cko-multidigest cko_stomach.c md5c.o sha1.o sha2.o adler32.o crc.o rmd160.o
+	gcc $(CFLAGS) -o cko-multidigest cko_stomach.c md5c.o sha1.o sha2.o adler32.o crc.o rmd160.o /usr/lib/libsqlite3.a -lpthread -ldl
 
 sha1.o: sha1.c
 	gcc $(CFLAGS) -c sha1.c
