@@ -1,6 +1,6 @@
-CFLAGS=-O2 -I.
+CFLAGS=-O2 -I. -lsqlite3
 
-all: cko-multidigest test
+all: cko-multidigest
 
 cko-multidigest: sha1.o sha2.o md5c.o adler32.o crc.o rmd160.o cko_stomach.c
 	gcc $(CFLAGS) -o cko-multidigest cko_stomach.c md5c.o sha1.o sha2.o adler32.o crc.o rmd160.o
