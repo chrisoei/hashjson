@@ -7,4 +7,5 @@ create table checksum (
   sha512 char(128),
   ripemd160 char(40),
   size integer,
+  note varchar,
   dts char(19) default current_timestamp);
