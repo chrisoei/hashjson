@@ -36,7 +36,7 @@ void cko_multidigest_init(cko_multidigest_ptr x) {
 }
 
 // CKODEBUG FIXIT: is unsigned int big enough?
-void cko_multidigest_update(cko_multidigest_ptr x,unsigned char* s,cko_u16 l) {
+void cko_multidigest_update(cko_multidigest_ptr x,unsigned char* s,cko_u32 l) {
   cko_u32 update_adler32();
   void crcFastUpdate();
 
@@ -214,7 +214,7 @@ void cko_multidigest_file(char* f) {
   cko_multidigest_t m;
   cko_multidigest_init(&m);
   m.filename = f;
-  int nbytes;
+  cko_u32 nbytes;
   char* dat;
   dat=(char*) malloc(m.chunksize);
   if (dat==NULL) {
@@ -232,7 +232,7 @@ void cko_multidigest_file(char* f) {
 void cko_multidigest_string(char* s) {
   cko_multidigest_t m;
   cko_multidigest_init(&m);
-  cko_multidigest_update(&m,s,(unsigned int)strlen(s));
+  cko_multidigest_update(&m,s,(cko_u32)strlen(s));
   cko_multidigest_final(&m);
 }
 

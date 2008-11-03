@@ -51,7 +51,7 @@ static void Encode PROTO_LIST
 static void Decode PROTO_LIST
   ((cko_u32 *, cko_u8 *, cko_u16));
 static void MD5_memcpy PROTO_LIST ((POINTER, POINTER, cko_u16));
-static void MD5_memset PROTO_LIST ((POINTER, int, cko_u16));
+static void MD5_memset PROTO_LIST ((POINTER, cko_u16, cko_u16));
 
 static cko_u8 PADDING[64] = {
   0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -115,9 +115,9 @@ MD5_CTX *context;                                        /* context */
 void MD5Update (context, input, inputLen)
 MD5_CTX *context;                                        /* context */
 cko_u8 *input;                                /* input block */
-cko_u16 inputLen;                     /* length of input block */
+cko_u32 inputLen;                     /* length of input block */
 {
-  cko_u16 i, index, partLen;
+  cko_u32 i, index, partLen;
 
   /* Compute number of bytes mod 64 */
   index = (cko_u16)((context->count[0] >> 3) & 0x3F);
@@ -323,7 +323,7 @@ cko_u16 len;
  */
 static void MD5_memset (output, value, len)
 POINTER output;
-int value;
+cko_u16 value;
 cko_u16 len;
 {
   cko_u16 i;
