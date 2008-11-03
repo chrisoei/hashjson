@@ -41,15 +41,15 @@
 
 #ifndef  RMD160H           /* make sure this file is read only once */
 #define  RMD160H
-
+#include <cko_types.h>
 
 /********************************************************************/
 
 /* typedef 8 and 32 bit types, resp.  */
 /* adapt these, if necessary, 
    for your operating system and compiler */
-typedef    unsigned char        byte;
-typedef    unsigned long        dword;
+typedef    cko_u8        byte;
+typedef    cko_u32       dword;
 
 /***/
 

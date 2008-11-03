@@ -1,3 +1,4 @@
+#include <cko_types.h>
 
       #define BASE 65521 /* largest prime smaller than 65536 */
 
@@ -8,18 +9,18 @@
 
        Usage example:
 
-         unsigned long adler = 1L;
+         cko_u32 adler = 1L;
 
          while (read_buffer(buffer, length) != EOF) {
            adler = update_adler32(adler, buffer, length);
          }
          if (adler != original_adler) error();
       */
-      unsigned long update_adler32(unsigned long adler,
-         unsigned char *buf, int len)
+      cko_u32 update_adler32(cko_u32 adler,
+         cko_u8 *buf, int len)
       {
-        unsigned long s1 = adler & 0xffff;
-        unsigned long s2 = (adler >> 16) & 0xffff;
+        cko_u32 s1 = adler & 0xffff;
+        cko_u32 s2 = (adler >> 16) & 0xffff;
         int n;
 
         for (n = 0; n < len; n++) {
@@ -33,7 +34,7 @@
 
 
 
-      unsigned long adler32(unsigned char *buf, int len)
+      cko_u32 adler32(cko_u8 *buf, int len)
       {
         return update_adler32(1L, buf, len);
       }

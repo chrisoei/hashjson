@@ -1,5 +1,6 @@
 #define CKO_MULTIDIGEST_VERSION	"2.0"
 #include <stdio.h>
+#include <stdlib.h>
 #include <global.h>
 #include <md5.h>
 #include <sha1.h>
@@ -10,14 +11,14 @@
 
 typedef struct {
   char* filename;
-  int chunksize;
+  cko_u32 chunksize;
   MD5_CTX md5_ctx;
   sha1_context sha1_ctx;
   sha512_ctx sha512_ctx;
   ripemd160_ctx_t ripemd160_ctx;
-  unsigned long adler32;
-  unsigned long crc32;
-  unsigned long size;
+  cko_u32 adler32;
+  cko_u32 crc32;
+  cko_u32 size;
 } cko_multidigest_t,*cko_multidigest_ptr;
 
 
@@ -35,8 +36,8 @@ void cko_multidigest_init(cko_multidigest_ptr x) {
 }
 
 // CKODEBUG FIXIT: is unsigned int big enough?
-void cko_multidigest_update(cko_multidigest_ptr x,unsigned char* s,unsigned int l) {
-  unsigned long update_adler32();
+void cko_multidigest_update(cko_multidigest_ptr x,unsigned char* s,cko_u16 l) {
+  cko_u32 update_adler32();
   void crcFastUpdate();
 
   x->size += l;
@@ -49,10 +50,10 @@ void cko_multidigest_update(cko_multidigest_ptr x,unsigned char* s,unsigned int 
 }
 
 void cko_multidigest_final(cko_multidigest_ptr x) {
-  unsigned char d_md5[18];
-  unsigned char d_sha1[20];
-  unsigned char d_sha512[64];
-  unsigned char d_ripemd160[160/8];
+  cko_u8 d_md5[18];
+  cko_u8 d_sha1[20];
+  cko_u8 d_sha512[64];
+  cko_u8 d_ripemd160[160/8];
   int i;
   int len;
   static const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -60,7 +61,7 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   int rc;
   sqlite3 *dbh;
   sqlite3_stmt* stmt;
-  static const char* ins = "INSERT INTO checksum(filename,adler32,crc32,md5,sha1,sha512,ripemd160,size) VALUES(?,?,?,?,?,?,?,?);";
+  static const char* ins = "INSERT INTO checksum(filename,adler32,crc32,md5,sha1,sha512,ripemd160,size,note) VALUES(?,?,?,?,?,?,?,?,?);";
   char hex_adler32[8+1];
   char hex_crc32[8+1];
   char hex_md5[32+1];
@@ -78,7 +79,7 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   sprintf(hex_crc32,"%08x",x->crc32);
   printf("\nCRC32: %s",hex_crc32);
   for (i=0;i<16;i++) {
-    sprintf(hex_md5+2*i,"%02x",(int)d_md5[i]);
+    sprintf(hex_md5+2*i,"%02x",(cko_s16)d_md5[i]);
   }
   printf("\nMD5: %s",hex_md5);
   printf("\nMD5 base 64: ");
@@ -93,11 +94,11 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
     printf("%c",(unsigned char) (len > 2 ? cb64[ d_md5[i+2] & 0x3f ] : '='));
   }
   for (i=0;i<20;i++) {
-    sprintf(hex_sha1+i*2,"%02x",(int)d_sha1[i]);
+    sprintf(hex_sha1+i*2,"%02x",(cko_s16)d_sha1[i]);
   }
   printf("\nSHA1: %s",hex_sha1);
   for (i=0;i<64;i++) {
-    sprintf(hex_sha512+i*2,"%02x",(int)d_sha512[i]);
+    sprintf(hex_sha512+i*2,"%02x",(cko_s16)d_sha512[i]);
   }
   printf("\nSHA512: %s",hex_sha512);
   MDfinish(&(x->ripemd160_ctx),"");
@@ -112,10 +113,11 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
     sprintf(hex_ripemd160+i*2,"%02x",d_ripemd160[i]);
   }
   printf("\nRIPEMD160: %s",hex_ripemd160);
-  printf("\nSize: %lu",x->size);
+  printf("\nSize: %lu",(unsigned long)x->size);
   printf("\nVersion: %s\n",CKO_MULTIDIGEST_VERSION);
 
-  if ((x->filename)&&(dbfile)&&strlen(dbfile)) {
+  if ((x->filename)&&(dbfile!=NULL)) {
+    if (strlen(dbfile)<1) return;
     printf("Opening %s...\n",dbfile);
     rc = sqlite3_open(dbfile,&dbh);
     if (rc) {
@@ -235,6 +237,7 @@ void cko_multidigest_string(char* s) {
 }
 
 int main(int argc,char* argv[]) {
+  cko_types_test();
   if (argc==1) {
     cko_multidigest_file(NULL);
   }

@@ -1,9 +1,9 @@
-CFLAGS=-O2 -I.
+CFLAGS=-g -I.
 
 all: cko-multidigest
 
-cko-multidigest: sha1.o sha2.o md5c.o adler32.o crc.o rmd160.o cko_stomach.c
-	gcc $(CFLAGS) -o cko-multidigest cko_stomach.c md5c.o sha1.o sha2.o adler32.o crc.o rmd160.o /usr/lib/libsqlite3.a -lpthread -ldl
+cko-multidigest: sha1.o sha2.o md5c.o adler32.o crc.o rmd160.o cko_stomach.c cko_types.o
+	gcc $(CFLAGS) -o cko-multidigest cko_stomach.c md5c.o sha1.o sha2.o adler32.o crc.o rmd160.o cko_types.o /usr/lib/libsqlite3.a -lpthread -ldl
 
 sha1.o: sha1.c
 	gcc $(CFLAGS) -c sha1.c
@@ -22,6 +22,9 @@ crc.o: crc.c
 
 rmd160.o: rmd160.h rmd160.c
 	gcc $(CFLAGS) -c rmd160.c
+
+cko_types.o: cko_types.c
+	gcc $(CFLAGS) -c cko_types.c
 
 test: cko-multidigest
 	./cko-multidigest test_vectors/vector1 > test_vectors/vector1.test
