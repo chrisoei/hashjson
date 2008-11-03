@@ -26,7 +26,7 @@
 
 #if (REFLECT_DATA == TRUE)
 #undef  REFLECT_DATA
-#define REFLECT_DATA(X)			((unsigned char) reflect((X), 8))
+#define REFLECT_DATA(X)			((cko_u8) reflect((X), 8))
 #else
 #undef  REFLECT_DATA
 #define REFLECT_DATA(X)			(X)
@@ -54,13 +54,13 @@
  *
  *********************************************************************/
 
-unsigned long reflect_lookup[256];
+cko_u32 reflect_lookup[256];
 
-static unsigned long
-reflect_impl(unsigned long data, unsigned char nBits)
+static cko_u32
+reflect_impl(cko_u32 data, cko_u8 nBits)
 {
-	unsigned long  reflection = 0x00000000;
-	unsigned char  bit;
+	cko_u32  reflection = 0x00000000;
+	cko_u8  bit;
 
 	/*
 	 * Reflect the data about the center bit.
@@ -82,8 +82,8 @@ reflect_impl(unsigned long data, unsigned char nBits)
 
 }	/* reflect() */
 
-static unsigned long
-reflect(unsigned long data, unsigned char nBits) {
+static cko_u32
+reflect(cko_u32 data, cko_u8 nBits) {
   return ( ((nBits==8)&(data<256)) ? 
     reflect_lookup[data] : reflect_impl(data,nBits));
 }
@@ -101,11 +101,11 @@ reflect(unsigned long data, unsigned char nBits) {
  *
  *********************************************************************/
 crc
-crcSlow(unsigned char const message[], int nBytes)
+crcSlow(cko_u8 const message[], int nBytes)
 {
     crc            remainder = INITIAL_REMAINDER;
 	int            byte;
-	unsigned char  bit;
+	cko_u8  bit;
 
 
     /*
@@ -166,7 +166,7 @@ crcInit(void)
 {
     crc			   remainder;
 	int			   dividend;
-	unsigned char  bit;
+	cko_u8  bit;
 
 
     /*
@@ -203,7 +203,7 @@ crcInit(void)
         crcTable[dividend] = remainder;
     }
     for (dividend=0;dividend<256;dividend++) 
-      reflect_lookup[dividend] = reflect_impl((unsigned long)dividend,8);
+      reflect_lookup[dividend] = reflect_impl((cko_u32)dividend,8);
 
 }   /* crcInit() */
 
@@ -225,9 +225,9 @@ crcFastInit(crc* remainderptr) {
    crcInit();
 }
 
-void crcFastUpdate(crc* remainderptr,unsigned char*  message, int nBytes)
+void crcFastUpdate(crc* remainderptr,cko_u8*  message, int nBytes)
 {
-    unsigned char  data;
+    cko_u8  data;
 	int            byte;
 
 

@@ -15,6 +15,7 @@
 
 #ifndef _crc_h
 #define _crc_h
+#include <cko_types.h>
 
 
 #define FALSE	0
@@ -40,7 +41,7 @@ typedef unsigned short  crc;
 
 #elif defined(CRC16)
 
-typedef unsigned short  crc;
+typedef cko_u16  crc;
 
 #define CRC_NAME			"CRC-16"
 #define POLYNOMIAL			0x8005
@@ -52,7 +53,7 @@ typedef unsigned short  crc;
 
 #elif defined(CRC32)
 
-typedef unsigned long  crc;
+typedef cko_u32  crc;
 
 #define CRC_NAME			"CRC-32"
 #define POLYNOMIAL			0x04C11DB7
