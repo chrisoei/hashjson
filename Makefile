@@ -27,10 +27,10 @@ cko_types.o: cko_types.c
 	gcc $(CFLAGS) -c cko_types.c
 
 test: cko-multidigest
-	./cko-multidigest test_vectors/vector1 > test_vectors/vector1.test
-	./cko-multidigest test_vectors/vector2 > test_vectors/vector2.test
-	./cko-multidigest test_vectors/vector2b > test_vectors/vector2b.test
-	./cko-multidigest test_vectors/vector3 > test_vectors/vector3.test
+	./cko-multidigest test_vectors/vector1 |grep -v Version > test_vectors/vector1.test
+	./cko-multidigest test_vectors/vector2 |grep -v Version > test_vectors/vector2.test
+	./cko-multidigest test_vectors/vector2b |grep -v Version > test_vectors/vector2b.test
+	./cko-multidigest test_vectors/vector3 |grep -v Version > test_vectors/vector3.test
 	diff test_vectors/vector1.test test_vectors/vector1.reference
 	diff test_vectors/vector2.test test_vectors/vector2.reference
 	diff test_vectors/vector2b.test test_vectors/vector2b.reference
