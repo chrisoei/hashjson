@@ -1,4 +1,4 @@
-#define CKO_MULTIDIGEST_VERSION	"2.0"
+#define CKO_MULTIDIGEST_VERSION	"2.1"
 #include <stdio.h>
 #include <stdlib.h>
 #include <global.h>
@@ -19,10 +19,12 @@ typedef struct {
   cko_u32 adler32;
   cko_u32 crc32;
   cko_u32 size;
+  char* note;
 } cko_multidigest_t,*cko_multidigest_ptr;
 
 
 void cko_multidigest_init(cko_multidigest_ptr x) {
+  x->note = "";
   void crcFastInit();
   x->filename=NULL;
   x->chunksize=1024*1024;
@@ -179,6 +181,12 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
       sqlite3_close(dbh);
       exit(1);
     }
+    rc = sqlite3_bind_text(stmt,9,x->note,-1,SQLITE_STATIC);
+    if (rc) {
+      fprintf(stderr,"Unable to bind note.\n");
+      sqlite3_close(dbh);
+      exit(1);
+    }
     rc = sqlite3_step(stmt);
     if (rc!=SQLITE_DONE) {
       fprintf(stderr,"Unable to execute db step.\n");
@@ -199,7 +207,7 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   }
 }
 
-void cko_multidigest_file(char* f) {
+void cko_multidigest_file(char* f,char* n) {
   FILE* fp;
   if (f!=NULL) {
     fp=fopen(f,"r");
@@ -214,6 +222,9 @@ void cko_multidigest_file(char* f) {
   cko_multidigest_t m;
   cko_multidigest_init(&m);
   m.filename = f;
+  m.note = n;
+  if (strlen(m.note)>0)
+    printf("Note: %s\n",m.note);
   cko_u32 nbytes;
   char* dat;
   dat=(char*) malloc(m.chunksize);
@@ -239,18 +250,27 @@ void cko_multidigest_string(char* s) {
 int main(int argc,char* argv[]) {
   cko_types_test();
   if (argc==1) {
-    cko_multidigest_file(NULL);
+    cko_multidigest_file(NULL,"");
+    return 0;
   }
   if (argc==2) {
-    cko_multidigest_file(argv[1]);
+    cko_multidigest_file(argv[1],"");
+    return 0;
   }
   if (argc==3) {
     if (!strcmp(argv[1],"-s")) {
       cko_multidigest_string(argv[2]);
-    } else {
-      printf("Usage: cko-multidigest -s <string>\n");
-      printf("Usage: cko-multidigest <filename>\n");
-      printf("Usage: cko-multidigest\n");
+      return 0;
     }
   }
+  if (argc==4) {
+    if (!strcmp(argv[1],"-n")) {
+      cko_multidigest_file(argv[3],argv[2]);
+      return 0;
+    }
+  }
+  printf("Usage: cko-multidigest -s <string>\n");
+  printf("Usage: cko-multidigest -n <note> <filename>\n");
+  printf("Usage: cko-multidigest\n");
+  return 0;
 }
