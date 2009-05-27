@@ -1,4 +1,4 @@
-#define CKO_MULTIDIGEST_VERSION	"2.1"
+#define CKO_MULTIDIGEST_VERSION	"2.2"
 #include <stdio.h>
 #include <stdlib.h>
 #include <global.h>
@@ -59,7 +59,7 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   int i;
   int len;
   static const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  char* dbfile = getenv("CKO_MULTIDIGEST_DB");
+  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
   int rc;
   sqlite3 *dbh;
   sqlite3_stmt* stmt;
