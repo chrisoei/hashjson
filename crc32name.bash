@@ -1,7 +1,13 @@
 #!/bin/bash
 
 x="$1"
-crc32=`cko-multidigest "$x" | grep 'CRC32:' | awk '{print $2}'|tr '[a-z]' '[A-Z]'`
+
+if [ -e /usr/bin/crc32 ]
+then
+  crc32=`crc32 "$x" | tr '[a-z]' '[A-Z]'`
+else
+  crc32=`cko-multidigest "$x" | grep 'CRC32:' | awk '{print $2}'|tr '[a-z]' '[A-Z]'`
+fi
 
 if [ -z "$2" ]
 then
@@ -23,5 +29,4 @@ then
 else
   echo "Unable to crc32 $x!"
 fi
-
 
