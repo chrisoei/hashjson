@@ -1,8 +1,15 @@
-apt-get install libsqlite3-dev libc6-dev
-
 cko-multidigest performs a variety of hashes on a string of file.
 
+Build:
+
+apt-get install libsqlite3-dev libc6-dev
+make
+make test
+
+
 Usage:
+
+export CKO_MULTIDIGEST_DB=cko-multidigest.db
 cko-multidigest -s mystring
 cko-multidigest myfile
 
