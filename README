@@ -9,7 +9,7 @@ make test
 
 Usage:
 
-export CKO_MULTIDIGEST_DB=ckoei-multidigest.db
+export CKOEI_MULTIDIGEST_DB=ckoei-multidigest.db
 ckoei-multidigest -s mystring
 ckoei-multidigest myfile
 
