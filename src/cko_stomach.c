@@ -19,6 +19,12 @@ typedef struct {
   cko_u32 adler32;
   cko_u32 crc32;
   cko_u32 size;
+  char hex_adler32[8+1];
+  char hex_crc32[8+1];
+  char hex_md5[32+1];
+  char hex_sha1[40+1];
+  char hex_sha512[128+1];
+  char hex_ripemd160[40+1];
   char* note;
 } cko_multidigest_t,*cko_multidigest_ptr;
 
@@ -51,6 +57,51 @@ void cko_multidigest_update(cko_multidigest_ptr x,unsigned char* s,cko_u32 l) {
   ripemd160_update(&(x->ripemd160_ctx),s,l);
 }
 
+void cko_multidigest_query(cko_multidigest_ptr x) {
+  int rc;
+  sqlite3 *dbh;
+  sqlite3_stmt* stmt;
+  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  static const char* query = "SELECT sha512,note from checksum where filename=?;";
+
+  rc = sqlite3_open(dbfile,&dbh);
+  if (rc) {
+    fprintf(stderr,"Unable to open db.\n");
+    sqlite3_close(dbh);
+    exit(1);
+  }
+  rc = sqlite3_prepare(dbh,query,256,&stmt,NULL);
+  if (rc) {
+    fprintf(stderr,"Unable to prepare statement.\n");
+    sqlite3_close(dbh);
+    exit(1);
+  }
+  rc = sqlite3_bind_text(stmt,1,x->filename,-1,SQLITE_STATIC);
+  if (rc) {
+    fprintf(stderr,"Unable to bind filename.\n");
+    sqlite3_close(dbh);
+    exit(1);
+  }
+  rc = sqlite3_step(stmt);
+  if (rc!=SQLITE_DONE) {
+    fprintf(stderr,"Unable to execute db step.\n");
+    sqlite3_close(dbh);
+    exit(1);
+  }
+  printf("SHA512: %s\n",sqlite3_column_text(stmt,0));
+  rc = sqlite3_finalize(stmt);
+  if (rc!=SQLITE_OK) {
+    fprintf(stderr,"Unable to finalize statement.\n");
+    exit(1);
+  }
+  rc = sqlite3_close(dbh);
+  if (rc!=SQLITE_OK) {
+    fprintf(stderr,"Unable to close db.\n");
+    exit(1);
+  }
+  printf("Database closed.\n");
+}
+
 void cko_multidigest_final(cko_multidigest_ptr x) {
   cko_u8 d_md5[18];
   cko_u8 d_sha1[20];
@@ -59,31 +110,20 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   int i;
   int len;
   static const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
-  int rc;
-  sqlite3 *dbh;
-  sqlite3_stmt* stmt;
-  static const char* ins = "INSERT INTO checksum(filename,adler32,crc32,md5,sha1,sha512,ripemd160,size,note) VALUES(?,?,?,?,?,?,?,?,?);";
-  char hex_adler32[8+1];
-  char hex_crc32[8+1];
-  char hex_md5[32+1];
-  char hex_sha1[40+1];
-  char hex_sha512[128+1];
-  char hex_ripemd160[40+1];
 
   MD5Final(d_md5,&(x->md5_ctx));
   sha1_finish(&(x->sha1_ctx),d_sha1);
   sha512_final(&(x->sha512_ctx),d_sha512);
   crcFastFinal(&(x->crc32));
 
-  sprintf(hex_adler32,"%08x",x->adler32);
-  printf("Adler32: %s",hex_adler32);
-  sprintf(hex_crc32,"%08x",x->crc32);
-  printf("\nCRC32: %s",hex_crc32);
+  sprintf(x->hex_adler32,"%08x",x->adler32);
+  printf("Adler32: %s",x->hex_adler32);
+  sprintf(x->hex_crc32,"%08x",x->crc32);
+  printf("\nCRC32: %s",x->hex_crc32);
   for (i=0;i<16;i++) {
-    sprintf(hex_md5+2*i,"%02x",(cko_s16)d_md5[i]);
+    sprintf(x->hex_md5+2*i,"%02x",(cko_s16)d_md5[i]);
   }
-  printf("\nMD5: %s",hex_md5);
+  printf("\nMD5: %s",x->hex_md5);
   printf("\nMD5 base 64: ");
   d_md5[16] = 0;
   d_md5[17] = 0;
@@ -96,13 +136,13 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
     printf("%c",(unsigned char) (len > 2 ? cb64[ d_md5[i+2] & 0x3f ] : '='));
   }
   for (i=0;i<20;i++) {
-    sprintf(hex_sha1+i*2,"%02x",(cko_s16)d_sha1[i]);
+    sprintf(x->hex_sha1+i*2,"%02x",(cko_s16)d_sha1[i]);
   }
-  printf("\nSHA1: %s",hex_sha1);
+  printf("\nSHA1: %s",x->hex_sha1);
   for (i=0;i<64;i++) {
-    sprintf(hex_sha512+i*2,"%02x",(cko_s16)d_sha512[i]);
+    sprintf(x->hex_sha512+i*2,"%02x",(cko_s16)d_sha512[i]);
   }
-  printf("\nSHA512: %s",hex_sha512);
+  printf("\nSHA512: %s",x->hex_sha512);
   MDfinish(&(x->ripemd160_ctx),"");
 
   for (i=0;i<20;i+=4 ) {
@@ -112,11 +152,20 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
     d_ripemd160[i+3] = (x->ripemd160_ctx.MDbuf[i>>2]>>24);
   }
   for (i=0;i<20;i++) {
-    sprintf(hex_ripemd160+i*2,"%02x",d_ripemd160[i]);
+    sprintf(x->hex_ripemd160+i*2,"%02x",d_ripemd160[i]);
   }
-  printf("\nRIPEMD160: %s",hex_ripemd160);
+  printf("\nRIPEMD160: %s",x->hex_ripemd160);
   printf("\nSize: %lu",(unsigned long)x->size);
   printf("\nVersion: %s\n",CKO_MULTIDIGEST_VERSION);
+
+}
+
+void cko_multidigest_insert(cko_multidigest_ptr x) {
+  int rc;
+  sqlite3 *dbh;
+  sqlite3_stmt* stmt;
+  static const char* ins = "INSERT INTO checksum(filename,adler32,crc32,md5,sha1,sha512,ripemd160,size,note) VALUES(?,?,?,?,?,?,?,?,?);";
+  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
 
   if ((x->filename)&&(dbfile!=NULL)) {
     if (strlen(dbfile)<1) return;
@@ -139,37 +188,37 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
       sqlite3_close(dbh);
       exit(1);
     }
-    rc = sqlite3_bind_text(stmt,2,hex_adler32,-1,SQLITE_STATIC);
+    rc = sqlite3_bind_text(stmt,2,x->hex_adler32,-1,SQLITE_STATIC);
     if (rc) {
       fprintf(stderr,"Unable to bind adler32.\n");
       sqlite3_close(dbh);
       exit(1);
     }
-    rc = sqlite3_bind_text(stmt,3,hex_crc32,-1,SQLITE_STATIC);
+    rc = sqlite3_bind_text(stmt,3,x->hex_crc32,-1,SQLITE_STATIC);
     if (rc) {
       fprintf(stderr,"Unable to bind crc32.\n");
       sqlite3_close(dbh);
       exit(1);
     }
-    rc = sqlite3_bind_text(stmt,4,hex_md5,-1,SQLITE_STATIC);
+    rc = sqlite3_bind_text(stmt,4,x->hex_md5,-1,SQLITE_STATIC);
     if (rc) {
       fprintf(stderr,"Unable to bind md5.\n");
       sqlite3_close(dbh);
       exit(1);
     }
-    rc = sqlite3_bind_text(stmt,5,hex_sha1,-1,SQLITE_STATIC);
+    rc = sqlite3_bind_text(stmt,5,x->hex_sha1,-1,SQLITE_STATIC);
     if (rc) {
       fprintf(stderr,"Unable to bind sha1.\n");
       sqlite3_close(dbh);
       exit(1);
     }
-    rc = sqlite3_bind_text(stmt,6,hex_sha512,-1,SQLITE_STATIC);
+    rc = sqlite3_bind_text(stmt,6,x->hex_sha512,-1,SQLITE_STATIC);
     if (rc) {
       fprintf(stderr,"Unable to bind sha512.\n");
       sqlite3_close(dbh);
       exit(1);
     }
-    rc = sqlite3_bind_text(stmt,7,hex_ripemd160,-1,SQLITE_STATIC);
+    rc = sqlite3_bind_text(stmt,7,x->hex_ripemd160,-1,SQLITE_STATIC);
     if (rc) {
       fprintf(stderr,"Unable to bind ripemd160.\n");
       sqlite3_close(dbh);
