@@ -298,6 +298,8 @@ void cko_multidigest_string(char* s) {
 
 int main(int argc,char* argv[]) {
   cko_types_test();
+  cko_multidigest_t m;
+  cko_multidigest_init(&m);
   if (argc==1) {
     cko_multidigest_file(NULL,"");
     return 0;
@@ -307,6 +309,11 @@ int main(int argc,char* argv[]) {
     return 0;
   }
   if (argc==3) {
+    if (!strcmp(argv[1],"-q")) {
+      m.filename = argv[2];
+      cko_multidigest_query(&m);
+      return 0;
+    }
     if (!strcmp(argv[1],"-s")) {
       cko_multidigest_string(argv[2]);
       return 0;
