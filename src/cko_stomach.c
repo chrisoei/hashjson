@@ -1,4 +1,4 @@
-#define CKO_MULTIDIGEST_VERSION	"2.2"
+#define CKO_MULTIDIGEST_VERSION	"2.3"
 #include <stdio.h>
 #include <stdlib.h>
 #include <global.h>
@@ -27,6 +27,9 @@ typedef struct {
   char hex_ripemd160[40+1];
   char* note;
 } cko_multidigest_t,*cko_multidigest_ptr;
+
+void cko_multidigest_query(cko_multidigest_ptr x);
+void cko_multidigest_file(cko_multidigest_ptr ctx);
 
 
 void cko_multidigest_init(cko_multidigest_ptr x) {
@@ -57,49 +60,16 @@ void cko_multidigest_update(cko_multidigest_ptr x,unsigned char* s,cko_u32 l) {
   ripemd160_update(&(x->ripemd160_ctx),s,l);
 }
 
-void cko_multidigest_query(cko_multidigest_ptr x) {
-  int rc;
-  sqlite3 *dbh;
-  sqlite3_stmt* stmt;
-  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
-  static const char* query = "SELECT sha512,note from checksum where filename=?;";
 
-  rc = sqlite3_open(dbfile,&dbh);
-  if (rc) {
-    fprintf(stderr,"Unable to open db.\n");
-    sqlite3_close(dbh);
-    exit(1);
-  }
-  rc = sqlite3_prepare(dbh,query,256,&stmt,NULL);
-  if (rc) {
-    fprintf(stderr,"Unable to prepare statement.\n");
-    sqlite3_close(dbh);
-    exit(1);
-  }
-  rc = sqlite3_bind_text(stmt,1,x->filename,-1,SQLITE_STATIC);
-  if (rc) {
-    fprintf(stderr,"Unable to bind filename.\n");
-    sqlite3_close(dbh);
-    exit(1);
-  }
-  rc = sqlite3_step(stmt);
-  if (rc!=SQLITE_DONE) {
-    fprintf(stderr,"Unable to execute db step.\n");
-    sqlite3_close(dbh);
-    exit(1);
-  }
-  printf("SHA512: %s\n",sqlite3_column_text(stmt,0));
-  rc = sqlite3_finalize(stmt);
-  if (rc!=SQLITE_OK) {
-    fprintf(stderr,"Unable to finalize statement.\n");
-    exit(1);
-  }
-  rc = sqlite3_close(dbh);
-  if (rc!=SQLITE_OK) {
-    fprintf(stderr,"Unable to close db.\n");
-    exit(1);
-  }
-  printf("Database closed.\n");
+void cko_multidigest_print(cko_multidigest_ptr x) {
+  printf("Adler32: %s",x->hex_adler32);
+  printf("\nCRC32: %s",x->hex_crc32);
+  printf("\nMD5: %s",x->hex_md5);
+  printf("\nSHA1: %s",x->hex_sha1);
+  printf("\nSHA512: %s",x->hex_sha512);
+  printf("\nRIPEMD160: %s",x->hex_ripemd160);
+  printf("\nSize: %lu",(unsigned long)x->size);
+  printf("\nVersion: %s\n",CKO_MULTIDIGEST_VERSION);
 }
 
 void cko_multidigest_final(cko_multidigest_ptr x) {
@@ -117,32 +87,16 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   crcFastFinal(&(x->crc32));
 
   sprintf(x->hex_adler32,"%08x",x->adler32);
-  printf("Adler32: %s",x->hex_adler32);
   sprintf(x->hex_crc32,"%08x",x->crc32);
-  printf("\nCRC32: %s",x->hex_crc32);
   for (i=0;i<16;i++) {
     sprintf(x->hex_md5+2*i,"%02x",(cko_s16)d_md5[i]);
-  }
-  printf("\nMD5: %s",x->hex_md5);
-  printf("\nMD5 base 64: ");
-  d_md5[16] = 0;
-  d_md5[17] = 0;
-  for (i=0;i<16;i+=3) {
-    len = 16 - i;
-    if (len > 3) len = 3;
-    printf("%c",cb64[d_md5[i] >> 2]);
-    printf("%c",cb64[((d_md5[i] & 0x03) << 4) | ((d_md5[i+1] & 0xf0) >> 4) ]);
-    printf("%c",(unsigned char) (len > 1 ? cb64[ ((d_md5[i+1] & 0x0f) << 2) | ((d_md5[i+2] & 0xc0) >> 6) ] : '='));
-    printf("%c",(unsigned char) (len > 2 ? cb64[ d_md5[i+2] & 0x3f ] : '='));
   }
   for (i=0;i<20;i++) {
     sprintf(x->hex_sha1+i*2,"%02x",(cko_s16)d_sha1[i]);
   }
-  printf("\nSHA1: %s",x->hex_sha1);
   for (i=0;i<64;i++) {
     sprintf(x->hex_sha512+i*2,"%02x",(cko_s16)d_sha512[i]);
   }
-  printf("\nSHA512: %s",x->hex_sha512);
   MDfinish(&(x->ripemd160_ctx),"");
 
   for (i=0;i<20;i+=4 ) {
@@ -154,9 +108,6 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   for (i=0;i<20;i++) {
     sprintf(x->hex_ripemd160+i*2,"%02x",d_ripemd160[i]);
   }
-  printf("\nRIPEMD160: %s",x->hex_ripemd160);
-  printf("\nSize: %lu",(unsigned long)x->size);
-  printf("\nVersion: %s\n",CKO_MULTIDIGEST_VERSION);
 
 }
 
@@ -169,7 +120,6 @@ void cko_multidigest_insert(cko_multidigest_ptr x) {
 
   if ((x->filename)&&(dbfile!=NULL)) {
     if (strlen(dbfile)<1) return;
-    printf("Opening %s...\n",dbfile);
     rc = sqlite3_open(dbfile,&dbh);
     if (rc) {
       fprintf(stderr,"Unable to open db.\n");
@@ -252,48 +202,107 @@ void cko_multidigest_insert(cko_multidigest_ptr x) {
       fprintf(stderr,"Unable to close db.\n");
       exit(1);
     }
-    printf("Database closed.\n");
   }
 }
 
-void cko_multidigest_file(char* f,char* n) {
+void cko_multidigest_file(cko_multidigest_ptr ctx) {
   FILE* fp;
-  if (f!=NULL) {
-    fp=fopen(f,"r");
-    printf("Filename: %s\n",f);
+  if (ctx->filename!=NULL) {
+    fp=fopen(ctx->filename,"r");
   } else {
     fp=stdin;
   }
   if (!fp) {
-    printf("Unable to open %s!\n",f);
+    printf("Unable to open %s!\n",ctx->filename);
     exit(1);
   }
-  cko_multidigest_t m;
-  cko_multidigest_init(&m);
-  m.filename = f;
-  m.note = n;
-  if (strlen(m.note)>0)
-    printf("Note: %s\n",m.note);
+  if (strlen(ctx->note)>0)
+    printf("Note: %s\n",ctx->note);
   cko_u32 nbytes;
   char* dat;
-  dat=(char*) malloc(m.chunksize);
+  dat=(char*) malloc(ctx->chunksize);
   if (dat==NULL) {
-    printf("Unable to malloc data buffer with size=%d\n",m.chunksize);
+    printf("Unable to malloc data buffer with size=%d\n",ctx->chunksize);
     exit(2);
   }
-  while((nbytes=fread(dat,1,m.chunksize,fp))>0) {
-    cko_multidigest_update(&m,dat,nbytes);
+  while((nbytes=fread(dat,1,ctx->chunksize,fp))>0) {
+    cko_multidigest_update(ctx,dat,nbytes);
   }
-  cko_multidigest_final(&m);
+  cko_multidigest_final(ctx);
   fclose(fp);
   free(dat);
 }
 
-void cko_multidigest_string(char* s) {
-  cko_multidigest_t m;
-  cko_multidigest_init(&m);
-  cko_multidigest_update(&m,s,(cko_u32)strlen(s));
-  cko_multidigest_final(&m);
+void cko_multidigest_query(cko_multidigest_ptr x) {
+  int rc;
+  sqlite3 *dbh;
+  sqlite3_stmt* stmt;
+  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  static const char* query = "SELECT sha512,note from checksum where filename=?;";
+
+  rc = sqlite3_open(dbfile,&dbh);
+  if (rc) {
+    fprintf(stderr,"Unable to open db.\n");
+    sqlite3_close(dbh);
+    exit(1);
+  }
+  rc = sqlite3_prepare(dbh,query,256,&stmt,NULL);
+  if (rc) {
+    fprintf(stderr,"Unable to prepare statement.\n");
+    sqlite3_close(dbh);
+    exit(1);
+  }
+  rc = sqlite3_bind_text(stmt,1,x->filename,-1,SQLITE_STATIC);
+  if (rc) {
+    fprintf(stderr,"Unable to bind filename.\n");
+    sqlite3_close(dbh);
+    exit(1);
+  }
+  rc = sqlite3_step(stmt);
+  
+  switch(rc) {
+    case SQLITE_DONE:
+      fprintf(stderr,"Query turned up no results.\n");
+      break;
+    case SQLITE_ROW:
+      //printf("SHA512: %s\n",sqlite3_column_text(stmt,0));
+
+      cko_multidigest_file(x);
+      if (strcmp(x->hex_sha512,sqlite3_column_text(stmt,0))) {
+        printf("ERROR!");
+      } else {
+        printf("OK.");
+      }
+      if (strlen(sqlite3_column_text(stmt,1))>0) {
+        printf(" Note: %s", sqlite3_column_text(stmt,1));
+      }
+      printf("\n");
+      break;
+  }
+  rc = sqlite3_finalize(stmt);
+  if (rc!=SQLITE_OK) {
+    fprintf(stderr,"Unable to finalize statement.\n");
+    exit(1);
+  }
+  rc = sqlite3_close(dbh);
+  if (rc!=SQLITE_OK) {
+    fprintf(stderr,"Unable to close db.\n");
+    exit(1);
+  }
+}
+
+void cko_multidigest_help() {
+  printf("Usage: ckoei-multidigest <filename>\n");
+  printf("       ckoei-multidigest -s <string>\n");
+  printf("       ckoei-multidigest -q <filename>\n");
+  printf("       ckoei-multidigest -n <note> <filename>\n");
+  printf("       ckoei-multidigest\n");
+  printf("export CKOEI_MULTIDIGEST_DB=<database filename>");
+}
+
+void cko_multidigest_string(cko_multidigest_ptr ctx, char* s) {
+  cko_multidigest_update(ctx,s,(cko_u32)strlen(s));
+  cko_multidigest_final(ctx);
 }
 
 int main(int argc,char* argv[]) {
@@ -301,27 +310,42 @@ int main(int argc,char* argv[]) {
   cko_multidigest_t m;
   cko_multidigest_init(&m);
   if (argc==1) {
-    cko_multidigest_file(NULL,"");
+    cko_multidigest_file(&m);
+    cko_multidigest_print(&m);
     return 0;
   }
   if (argc==2) {
-    cko_multidigest_file(argv[1],"");
+    if ((!strcmp(argv[1],"-h"))||(!strcmp(argv[1],"--help"))) {
+      cko_multidigest_help();
+    } else {
+      m.filename = argv[1];
+      printf("Filename: %s\n",m.filename);
+      cko_multidigest_file(&m);
+      cko_multidigest_print(&m);
+      cko_multidigest_insert(&m);
+    }
     return 0;
   }
   if (argc==3) {
     if (!strcmp(argv[1],"-q")) {
       m.filename = argv[2];
+      printf("%s: ",m.filename);
       cko_multidigest_query(&m);
       return 0;
     }
     if (!strcmp(argv[1],"-s")) {
-      cko_multidigest_string(argv[2]);
+      cko_multidigest_string(&m,argv[2]);
+      cko_multidigest_print(&m);
       return 0;
     }
   }
   if (argc==4) {
     if (!strcmp(argv[1],"-n")) {
-      cko_multidigest_file(argv[3],argv[2]);
+      m.filename = argv[3];
+      m.note = argv[2];
+      cko_multidigest_file(&m);
+      cko_multidigest_print(&m);
+      cko_multidigest_insert(&m);
       return 0;
     }
   }
