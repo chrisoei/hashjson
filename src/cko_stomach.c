@@ -1,4 +1,4 @@
-#define CKO_MULTIDIGEST_VERSION	"2.3"
+#define CKO_MULTIDIGEST_VERSION	"2.4"
 #include <stdio.h>
 #include <stdlib.h>
 #include <global.h>
@@ -262,7 +262,7 @@ void cko_multidigest_query(cko_multidigest_ptr x) {
   
   switch(rc) {
     case SQLITE_DONE:
-      fprintf(stderr,"Query turned up no results.\n");
+      printf("Query turned up no results.\n");
       break;
     case SQLITE_ROW:
       //printf("SHA512: %s\n",sqlite3_column_text(stmt,0));
@@ -297,7 +297,7 @@ void cko_multidigest_help() {
   printf("       ckoei-multidigest -q <filename>\n");
   printf("       ckoei-multidigest -n <note> <filename>\n");
   printf("       ckoei-multidigest\n");
-  printf("export CKOEI_MULTIDIGEST_DB=<database filename>");
+  printf("export CKOEI_MULTIDIGEST_DB=<database filename>\n");
 }
 
 void cko_multidigest_string(cko_multidigest_ptr ctx, char* s) {
@@ -349,8 +349,6 @@ int main(int argc,char* argv[]) {
       return 0;
     }
   }
-  printf("Usage: cko-multidigest -s <string>\n");
-  printf("Usage: cko-multidigest -n <note> <filename>\n");
-  printf("Usage: cko-multidigest\n");
+  cko_multidigest_help();
   return 0;
 }
