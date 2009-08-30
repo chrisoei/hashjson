@@ -70,6 +70,8 @@ void cko_multidigest_print(cko_multidigest_ptr x) {
   printf("\nRIPEMD160: %s",x->hex_ripemd160);
   printf("\nSize: %lu",(unsigned long)x->size);
   printf("\nVersion: %s\n",CKO_MULTIDIGEST_VERSION);
+  if (strlen(x->note)>0)
+    printf("Note: %s\n",x->note);
 }
 
 void cko_multidigest_final(cko_multidigest_ptr x) {
@@ -216,8 +218,6 @@ void cko_multidigest_file(cko_multidigest_ptr ctx) {
     printf("Unable to open %s!\n",ctx->filename);
     exit(1);
   }
-  if (strlen(ctx->note)>0)
-    printf("Note: %s\n",ctx->note);
   cko_u32 nbytes;
   char* dat;
   dat=(char*) malloc(ctx->chunksize);
