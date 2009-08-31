@@ -395,6 +395,11 @@ int main(int argc,char* argv[]) {
   } else if (argc==4) {
     if (cko_arg_match(argv[1],"-n","--note")) {
       m.filename = argv[3];
+      int cnt = cko_multidigest_count(&m);
+      if (cnt > 0) {
+        printf("Already %d entries in database.\n",cnt);
+        return 0;
+      }
       m.note = argv[2];
       cko_multidigest_file(&m);
       cko_multidigest_print(&m);
