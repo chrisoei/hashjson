@@ -32,6 +32,10 @@ int cko_multidigest_count(cko_multidigest_ptr x);
 void cko_multidigest_file(cko_multidigest_ptr ctx);
 void cko_multidigest_query(cko_multidigest_ptr x);
 
+int cko_arg_match(char* x, char* s, char* l) {
+  return (!strcmp(x,s)||!strcmp(x,l)) ? 1 : 0;
+}
+
 
 void cko_multidigest_init(cko_multidigest_ptr x) {
   x->note = "";
@@ -331,11 +335,11 @@ void cko_multidigest_query(cko_multidigest_ptr x) {
 }
 
 void cko_multidigest_help() {
-  printf("Usage: ckoei-multidigest -a <filename>\n");
-  printf("       ckoei-multidigest -h\n");
-  printf("       ckoei-multidigest -s <string>\n");
-  printf("       ckoei-multidigest -q <filename>\n");
-  printf("       ckoei-multidigest -n <note> <filename>\n");
+  printf("Usage: ckoei-multidigest -a|-add <filename>\n");
+  printf("       ckoei-multidigest -h|--help\n");
+  printf("       ckoei-multidigest -s|--string <string>\n");
+  printf("       ckoei-multidigest -q|--query <filename>\n");
+  printf("       ckoei-multidigest -n|--note <note> <filename>\n");
   printf("       ckoei-multidigest\n");
   printf("export CKOEI_MULTIDIGEST_DB=<database filename>\n");
 }
@@ -355,7 +359,7 @@ int main(int argc,char* argv[]) {
     cko_multidigest_print(&m);
     return 0;
   } else if (argc==2) {
-    if ((!strcmp(argv[1],"-h"))||(!strcmp(argv[1],"--help"))) {
+    if (cko_arg_match(argv[1],"-h","--help")) {
       cko_multidigest_help();
       return 0;
     } else {
@@ -363,7 +367,7 @@ int main(int argc,char* argv[]) {
       return 0;
     }
   } else if (argc==3) {
-    if (!strcmp(argv[1],"-a")) {
+    if (cko_arg_match(argv[1],"-a","--add")) {
       m.filename = argv[2];
       printf("Filename: %s\n",m.filename);
       int cnt = cko_multidigest_count(&m);
@@ -375,12 +379,12 @@ int main(int argc,char* argv[]) {
       cko_multidigest_print(&m);
       cko_multidigest_insert(&m);
       return 0;
-    } else if (!strcmp(argv[1],"-q")) {
+    } else if (cko_arg_match(argv[1],"-q","--query")) {
       m.filename = argv[2];
       printf("%s: ",m.filename);
       cko_multidigest_query(&m);
       return 0;
-    } else if (!strcmp(argv[1],"-s")) {
+    } else if (cko_arg_match(argv[1],"-s","--string")) {
       cko_multidigest_string(&m,argv[2]);
       cko_multidigest_print(&m);
       return 0;
@@ -389,7 +393,7 @@ int main(int argc,char* argv[]) {
       return 0;
     }
   } else if (argc==4) {
-    if (!strcmp(argv[1],"-n")) {
+    if (cko_arg_match(argv[1],"-n","--note")) {
       m.filename = argv[3];
       m.note = argv[2];
       cko_multidigest_file(&m);
