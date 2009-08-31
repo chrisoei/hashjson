@@ -3,7 +3,7 @@ CFLAGS=-O3 -I.
 all: ckoei-multidigest
 
 ckoei-multidigest: sha1.o sha2.o md5c.o adler32.o crc.o rmd160.o cko_stomach.c cko_types.o
-	gcc $(CFLAGS) -o ckoei-multidigest cko_stomach.c md5c.o sha1.o sha2.o adler32.o crc.o rmd160.o cko_types.o /usr/lib/libsqlite3.a -lpthread -ldl
+	gcc $(CFLAGS) -o ckoei-multidigest cko_stomach.c md5c.o sha1.o sha2.o adler32.o crc.o rmd160.o cko_types.o -lpthread -ldl
 
 sha1.o: sha1.c
 	gcc $(CFLAGS) -c sha1.c
@@ -27,10 +27,10 @@ cko_types.o: cko_types.c
 	gcc $(CFLAGS) -c cko_types.c
 
 test: ckoei-multidigest
-	./ckoei-multidigest test_vectors/vector1 |grep -v Version > test_vectors/vector1.test
-	./ckoei-multidigest test_vectors/vector2 |grep -v Version > test_vectors/vector2.test
-	./ckoei-multidigest test_vectors/vector2b |grep -v Version > test_vectors/vector2b.test
-	./ckoei-multidigest test_vectors/vector3 |grep -v Version > test_vectors/vector3.test
+	./ckoei-multidigest -c test_vectors/vector1 |grep -v Version > test_vectors/vector1.test
+	./ckoei-multidigest --checksum test_vectors/vector2 |grep -v Version > test_vectors/vector2.test
+	./ckoei-multidigest -c test_vectors/vector2b |grep -v Version > test_vectors/vector2b.test
+	./ckoei-multidigest --checksum test_vectors/vector3 |grep -v Version > test_vectors/vector3.test
 	diff test_vectors/vector1.test test_vectors/vector1.reference
 	diff test_vectors/vector2.test test_vectors/vector2.reference
 	diff test_vectors/vector2b.test test_vectors/vector2b.reference
