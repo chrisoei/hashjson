@@ -216,7 +216,7 @@ void cko_multidigest_insert(cko_multidigest_ptr x) {
 void cko_multidigest_file(cko_multidigest_ptr ctx) {
   FILE* fp;
   if (ctx->filename!=NULL) {
-    fp=fopen(ctx->filename,"r");
+    fp=(FILE*)fopen64(ctx->filename,"r");
   } else {
     fp=stdin;
   }
@@ -224,7 +224,7 @@ void cko_multidigest_file(cko_multidigest_ptr ctx) {
     printf("Unable to open %s!\n",ctx->filename);
     exit(1);
   }
-  cko_u32 nbytes;
+  cko_u64 nbytes;
   char* dat;
   dat=(char*) malloc(ctx->chunksize);
   if (dat==NULL) {
