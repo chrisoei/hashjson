@@ -244,35 +244,37 @@ int cko_multidigest_count(cko_multidigest_ptr x) {
   sqlite3_stmt* stmt;
   int rc;
   char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
-  static const char* query = "SELECT count(*) from checksum where filename=?;";
-  rc = sqlite3_open(dbfile,&dbh);
-  if (rc) {
-    fprintf(stderr,"Unable to open db.\n");
-    sqlite3_close(dbh);
-    exit(1);
+  if ((x->filename)&&(dbfile!=NULL)) {
+    static const char* query = "SELECT count(*) from checksum where filename=?;";
+    rc = sqlite3_open(dbfile,&dbh);
+    if (rc) {
+      fprintf(stderr,"Unable to open db.\n");
+      sqlite3_close(dbh);
+      exit(1);
+    }
+    rc = sqlite3_prepare(dbh,query,256,&stmt,NULL);
+    if (rc) {
+      fprintf(stderr,"Unable to prepare statement.\n");
+      sqlite3_close(dbh);
+      exit(1);
+    }
+    rc = sqlite3_bind_text(stmt,1,x->filename,-1,SQLITE_STATIC);
+    if (rc) {
+      fprintf(stderr,"Unable to bind filename.\n");
+      sqlite3_close(dbh);
+      exit(1);
+    }
+    rc = sqlite3_step(stmt);
+    switch(rc) {
+      case SQLITE_DONE:
+        printf("Weird error: Query turned up no results.\n");
+        break;
+      case SQLITE_ROW:
+        ans = sqlite3_column_int(stmt,0);
+        break;
+    }
+    rc = sqlite3_finalize(stmt);
   }
-  rc = sqlite3_prepare(dbh,query,256,&stmt,NULL);
-  if (rc) {
-    fprintf(stderr,"Unable to prepare statement.\n");
-    sqlite3_close(dbh);
-    exit(1);
-  }
-  rc = sqlite3_bind_text(stmt,1,x->filename,-1,SQLITE_STATIC);
-  if (rc) {
-    fprintf(stderr,"Unable to bind filename.\n");
-    sqlite3_close(dbh);
-    exit(1);
-  }
-  rc = sqlite3_step(stmt);
-  switch(rc) {
-    case SQLITE_DONE:
-      printf("Weird error: Query turned up no results.\n");
-      break;
-    case SQLITE_ROW:
-      ans = sqlite3_column_int(stmt,0);
-      break;
-  }
-  rc = sqlite3_finalize(stmt);
   return ans;
 }
 
@@ -335,7 +337,8 @@ void cko_multidigest_query(cko_multidigest_ptr x) {
 }
 
 void cko_multidigest_help() {
-  printf("Usage: ckoei-multidigest -a|-add <filename>\n");
+  printf("Usage: ckoei-multidigest -a|--add <filename>\n");
+  printf("Usage: ckoei-multidigest -c|--checksum <filename>\n");
   printf("       ckoei-multidigest -h|--help\n");
   printf("       ckoei-multidigest -s|--string <string>\n");
   printf("       ckoei-multidigest -q|--query <filename>\n");
@@ -378,6 +381,12 @@ int main(int argc,char* argv[]) {
       cko_multidigest_file(&m);
       cko_multidigest_print(&m);
       cko_multidigest_insert(&m);
+      return 0;
+    } else if (cko_arg_match(argv[1],"-c","--checksum")) {
+      m.filename = argv[2];
+      printf("Filename: %s\n",m.filename);
+      cko_multidigest_file(&m);
+      cko_multidigest_print(&m);
       return 0;
     } else if (cko_arg_match(argv[1],"-q","--query")) {
       m.filename = argv[2];
