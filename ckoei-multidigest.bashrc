@@ -9,6 +9,7 @@ fi
 
 alias chk.itunes='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/iTunes.sqlite3"'
 alias chk.icsi='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/icsi.sqlite3"'
+alias chk.nestria='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/nestria.sqlite3"'
 alias chk.vb='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/VirtualBox/`hostname`.sqlite3"'
 
 alias chk.cd='cd "$CKOEI_MULTIDIGEST_DATA_HOME"'
