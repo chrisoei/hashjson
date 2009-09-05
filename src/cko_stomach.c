@@ -1,4 +1,4 @@
-#define CKO_MULTIDIGEST_VERSION	"2.4"
+#define CKO_MULTIDIGEST_VERSION	"2.4.1"
 #include <stdio.h>
 #include <stdlib.h>
 #include <global.h>
