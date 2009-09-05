@@ -18,7 +18,7 @@ typedef struct {
   ripemd160_ctx_t ripemd160_ctx;
   cko_u32 adler32;
   cko_u32 crc32;
-  cko_u32 size;
+  cko_u64 size;
   char hex_adler32[8+1];
   char hex_crc32[8+1];
   char hex_md5[32+1];
@@ -182,7 +182,7 @@ void cko_multidigest_insert(cko_multidigest_ptr x) {
       sqlite3_close(dbh);
       exit(1);
     }
-    rc = sqlite3_bind_int(stmt,8,x->size);
+    rc = sqlite3_bind_int64(stmt,8,x->size);
     if (rc) {
       fprintf(stderr,"Unable to bind size.\n");
       sqlite3_close(dbh);
