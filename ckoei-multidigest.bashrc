@@ -16,6 +16,7 @@ alias chk.cd='cd "$CKOEI_MULTIDIGEST_DATA_HOME"'
 alias chk.echo='echo $CKOEI_MULTIDIGEST_DB'
 alias chk.q='ckoei-multidigest -q'
 alias chk.a='ckoei-multidigest -a'
+alias chk.f='ckoei-multidigest -f'
 alias chk.sqlite='sqlite3 $CKOEI_MULTIDIGEST_DB'
 
 
