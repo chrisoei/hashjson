@@ -1,5 +1,6 @@
 
-export CKOEI_DATA_HOME=$HOME/git/data
+export CKOEI_DATA_HOME="/cygdrive/c/Users/software/Documents/My Dropbox/2009-06-25/Data"
+#export CKOEI_DATA_HOME=$HOME/git/data
 export CKOEI_MULTIDIGEST_DATA_HOME="$CKOEI_DATA_HOME/ckoei-multidigest"
 
 if [ ! -e "$CKOEI_MULTIDIGEST_DATA_HOME" ]
@@ -16,11 +17,11 @@ alias chk.image='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/image
 alias chk.vb='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/VirtualBox/`hostname`.sqlite3"'
 
 alias chk.cd='cd "$CKOEI_MULTIDIGEST_DATA_HOME"'
-alias chk.echo='echo $CKOEI_MULTIDIGEST_DB'
+alias chk.echo='echo "$CKOEI_MULTIDIGEST_DB"'
 alias chk.a='ckoei-multidigest -a'
 alias chk.f='ckoei-multidigest -f'
 alias chk.n='ckoei-multidigest -n'
 alias chk.q='ckoei-multidigest -q'
-alias chk.sqlite='sqlite3 $CKOEI_MULTIDIGEST_DB'
+alias chk.sqlite='sqlite3 "$CKOEI_MULTIDIGEST_DB"'
 
 
