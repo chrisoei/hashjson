@@ -9,3 +9,9 @@ create table checksum (
   size integer,
   note varchar default null,
   dts char(19) default current_timestamp);
+
+create table annotation (
+  md5 char(32),
+  sha1 char(40),
+  comment varchar default null,
+  dts char(19) default current_timestamp);
