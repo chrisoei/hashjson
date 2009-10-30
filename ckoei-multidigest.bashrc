@@ -1,6 +1,13 @@
 
-export CKOEI_DATA_HOME="/cygdrive/c/Users/software/Documents/My Dropbox/2009-06-25/Data"
-#export CKOEI_DATA_HOME=$HOME/git/data
+for x in "/cygdrive/c/Users/software/Documents/My Dropbox/2009-06-25/Data" "$HOME/Dropbox/2009-06-25/Data" "$HOME/git/data"
+do
+	if [ -e "$x" ]
+	then
+		export CKOEI_DATA_HOME="$x"
+		break
+	fi
+done
+
 export CKOEI_MULTIDIGEST_DATA_HOME="$CKOEI_DATA_HOME/ckoei-multidigest"
 
 if [ ! -e "$CKOEI_MULTIDIGEST_DATA_HOME" ]
@@ -14,6 +21,7 @@ alias chk.itunes='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/iTun
 alias chk.icsi='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/icsi.sqlite3"'
 alias chk.nestria='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/nestria.sqlite3"'
 alias chk.image='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/image.sqlite3"'
+alias chk.veracity='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/veracity.sqlite3"'
 alias chk.vb='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/VirtualBox/`hostname`.sqlite3"'
 
 alias chk.cd='cd "$CKOEI_MULTIDIGEST_DATA_HOME"'
