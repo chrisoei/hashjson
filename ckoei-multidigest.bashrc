@@ -16,6 +16,7 @@ then
 fi
 
 alias chk.anime='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/anime.sqlite3"'
+alias chk.medical='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/medical.sqlite3"'
 alias chk.comic='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/comic.sqlite3"'
 alias chk.itunes='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/iTunes.sqlite3"'
 alias chk.icsi='export CKOEI_MULTIDIGEST_DB="$CKOEI_MULTIDIGEST_DATA_HOME/icsi.sqlite3"'
