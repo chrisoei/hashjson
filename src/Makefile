@@ -1,4 +1,5 @@
-CFLAGS=-O3 -I. -DCYGWIN
+# use -DCYGWIN for cygwin
+CFLAGS=-O3 -I. -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
 
 all: ckoei-multidigest
 
