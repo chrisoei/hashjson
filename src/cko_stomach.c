@@ -381,6 +381,46 @@ void cko_multidigest_find(cko_multidigest_ptr x) {
   }
 }
 
+void cko_multidigest_lookup(cko_multidigest_ptr x) {
+  int rc;
+  sqlite3 *dbh;
+  sqlite3_stmt* stmt;
+  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  static const char* query = "SELECT dts,comment from annotation where sha1=? ORDER BY DTS;";
+  rc = sqlite3_open(dbfile,&dbh);
+  if (rc) {
+    fprintf(stderr,"Unable to open db.\n");
+    sqlite3_close(dbh);
+    exit(1);
+  }
+  rc = sqlite3_prepare(dbh,query,256,&stmt,NULL);
+  if (rc) {
+    fprintf(stderr,"Unable to prepare statement.\n");
+    sqlite3_close(dbh);
+    exit(1);
+  }
+  rc = sqlite3_bind_text(stmt,1,x->hex_sha1,-1,SQLITE_STATIC);
+  if (rc) {
+    fprintf(stderr,"Unable to bind sha1.\n");
+    sqlite3_close(dbh);
+    exit(1);
+  }
+  while ((rc = sqlite3_step(stmt))==SQLITE_ROW) {
+      printf("%s: %s\n",sqlite3_column_text(stmt,0),sqlite3_column_text(stmt,1));
+  }
+  rc = sqlite3_finalize(stmt);
+  if (rc!=SQLITE_OK) {
+    fprintf(stderr,"Unable to finalize statement.\n");
+    exit(1);
+  }
+  rc = sqlite3_close(dbh);
+  if (rc!=SQLITE_OK) {
+    fprintf(stderr,"Unable to close db.\n");
+    exit(1);
+  }
+
+}
+
 void cko_multidigest_query(cko_multidigest_ptr x) {
   int rc;
   sqlite3 *dbh;
@@ -501,6 +541,7 @@ int main(int argc,char* argv[]) {
       m.filename = argv[2];
       printf("%s: ",m.filename);
       cko_multidigest_query(&m);
+      cko_multidigest_lookup(&m);
       return 0;
     } else if (cko_arg_match(argv[1],"-s","--string")) {
       cko_multidigest_string(&m,argv[2]);
