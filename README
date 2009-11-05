@@ -1,15 +1,1 @@
-cko-multidigest performs a variety of hashes on a string of file.
-
-Build:
-
-apt-get install libsqlite3-dev libc6-dev
-make
-make test
-
-
-Usage:
-
-export CKOEI_MULTIDIGEST_DB=ckoei-multidigest.db
-ckoei-multidigest -s mystring
-ckoei-multidigest myfile
-
+http://sites.google.com/site/oeipedia/technology/data-preservation/ckoei-multidigest
