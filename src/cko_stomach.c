@@ -406,7 +406,7 @@ void cko_multidigest_lookup(cko_multidigest_ptr x) {
     exit(1);
   }
   while ((rc = sqlite3_step(stmt))==SQLITE_ROW) {
-      printf("%s: %s\n",sqlite3_column_text(stmt,0),sqlite3_column_text(stmt,1));
+      printf("Comment %s: %s\n",sqlite3_column_text(stmt,0),sqlite3_column_text(stmt,1));
   }
   rc = sqlite3_finalize(stmt);
   if (rc!=SQLITE_OK) {
@@ -546,6 +546,7 @@ int main(int argc,char* argv[]) {
     } else if (cko_arg_match(argv[1],"-s","--string")) {
       cko_multidigest_string(&m,argv[2]);
       cko_multidigest_print(&m);
+      cko_multidigest_lookup(&m);
       return 0;
     } else {
       cko_multidigest_help();
