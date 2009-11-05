@@ -1,4 +1,4 @@
-#define CKO_MULTIDIGEST_VERSION	"2.4.1"
+#define CKO_MULTIDIGEST_VERSION	"2.5.1"
 #include <stdio.h>
 #include <stdlib.h>
 #include <global.h>
@@ -119,6 +119,63 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
 
 }
 
+void cko_multidigest_comment(cko_multidigest_ptr x,char* cmt) {
+  int rc;
+  sqlite3 *dbh;
+  sqlite3_stmt* stmt;
+  static const char* ins = "INSERT INTO annotation(md5,sha1,comment) VALUES(?,?,?);";
+  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  if ((x->filename)&&(dbfile!=NULL)) {
+    if (strlen(dbfile)<1) return;
+    rc = sqlite3_open(dbfile,&dbh);
+    if (rc) {
+      fprintf(stderr,"Unable to open db.\n");
+      sqlite3_close(dbh);
+      exit(1);
+    }
+    rc = sqlite3_prepare(dbh,ins,256,&stmt,NULL);
+    if (rc) {
+      fprintf(stderr,"Unable to prepare statement.\n");
+      sqlite3_close(dbh);
+      exit(1);
+    }
+    rc = sqlite3_bind_text(stmt,1,x->hex_md5,-1,SQLITE_STATIC);
+    if (rc) {
+      fprintf(stderr,"Unable to bind md5.\n");
+      sqlite3_close(dbh);
+      exit(1);
+    }
+    rc = sqlite3_bind_text(stmt,2,x->hex_sha1,-1,SQLITE_STATIC);
+    if (rc) {
+      fprintf(stderr,"Unable to bind sha1.\n");
+      sqlite3_close(dbh);
+      exit(1);
+    }
+    rc = sqlite3_bind_text(stmt,3,cmt,-1,SQLITE_STATIC);
+    if (rc) {
+      fprintf(stderr,"Unable to bind comment.\n");
+      sqlite3_close(dbh);
+      exit(1);
+    }
+    rc = sqlite3_step(stmt);
+    if (rc!=SQLITE_DONE) {
+      fprintf(stderr,"Unable to execute db step.\n");
+      sqlite3_close(dbh);
+      exit(1);
+    }
+    rc = sqlite3_finalize(stmt);
+    if (rc!=SQLITE_OK) {
+      fprintf(stderr,"Unable to finalize statement.\n");
+      exit(1);
+    }
+    rc = sqlite3_close(dbh);
+    if (rc!=SQLITE_OK) {
+      fprintf(stderr,"Unable to close db.\n");
+      exit(1);
+    }
+  }
+}
+
 void cko_multidigest_insert(cko_multidigest_ptr x) {
   int rc;
   sqlite3 *dbh;
@@ -216,7 +273,11 @@ void cko_multidigest_insert(cko_multidigest_ptr x) {
 void cko_multidigest_file(cko_multidigest_ptr ctx) {
   FILE* fp;
   if (ctx->filename!=NULL) {
+#ifdef CYGWIN
+    fp=(FILE*)fopen(ctx->filename,"r");
+#else
     fp=(FILE*)fopen64(ctx->filename,"r");
+#endif
   } else {
     fp=stdin;
   }
@@ -380,12 +441,13 @@ void cko_multidigest_query(cko_multidigest_ptr x) {
 
 void cko_multidigest_help() {
   printf("Usage: ckoei-multidigest -a|--add <filename>\n");
-  printf("       ckoei-multidigest -c|--checksum <filename>\n");
+  printf("       ckoei-multidigest -c|--comment <comment> <filename>\n");
   printf("       ckoei-multidigest -f|--find <filename>\n");
   printf("       ckoei-multidigest -h|--help\n");
   printf("       ckoei-multidigest -n|--note <note> <filename>\n");
   printf("       ckoei-multidigest -s|--string <string>\n");
   printf("       ckoei-multidigest -q|--query <filename>\n");
+  printf("       ckoei-multidigest -x|--checksum <filename>\n");
   printf("       ckoei-multidigest\n");
   printf("export CKOEI_MULTIDIGEST_DB=<database filename>\n");
 }
@@ -425,7 +487,7 @@ int main(int argc,char* argv[]) {
       cko_multidigest_print(&m);
       cko_multidigest_insert(&m);
       return 0;
-    } else if (cko_arg_match(argv[1],"-c","--checksum")) {
+    } else if (cko_arg_match(argv[1],"-x","--checksum")) {
       m.filename = argv[2];
       printf("Filename: %s\n",m.filename);
       cko_multidigest_file(&m);
@@ -460,6 +522,11 @@ int main(int argc,char* argv[]) {
       cko_multidigest_file(&m);
       cko_multidigest_print(&m);
       cko_multidigest_insert(&m);
+      return 0;
+    } else if (cko_arg_match(argv[1],"-c","--comment")) {
+      m.filename = argv[3];
+      cko_multidigest_file(&m);
+      cko_multidigest_comment(&m,argv[2]);
       return 0;
     } else {
       cko_multidigest_help();

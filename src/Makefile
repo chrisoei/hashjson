@@ -1,4 +1,4 @@
-CFLAGS=-O3 -I.
+CFLAGS=-O3 -I. -DCYGWIN
 
 all: ckoei-multidigest
 
@@ -30,9 +30,9 @@ cko_types.o: cko_types.c
 	gcc $(CFLAGS) -c cko_types.c
 
 test: ckoei-multidigest
-	./ckoei-multidigest -c test_vectors/vector1 |grep -v Version > test_vectors/vector1.test
+	./ckoei-multidigest -x test_vectors/vector1 |grep -v Version > test_vectors/vector1.test
 	./ckoei-multidigest --checksum test_vectors/vector2 |grep -v Version > test_vectors/vector2.test
-	./ckoei-multidigest -c test_vectors/vector2b |grep -v Version > test_vectors/vector2b.test
+	./ckoei-multidigest -x test_vectors/vector2b |grep -v Version > test_vectors/vector2b.test
 	./ckoei-multidigest --checksum test_vectors/vector3 |grep -v Version > test_vectors/vector3.test
 	diff test_vectors/vector1.test test_vectors/vector1.reference
 	diff test_vectors/vector2.test test_vectors/vector2.reference
