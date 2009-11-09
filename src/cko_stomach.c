@@ -1,4 +1,3 @@
-#define CKO_MULTIDIGEST_VERSION	"2.5.1"
 #include <stdio.h>
 #include <stdlib.h>
 #include <global.h>
@@ -75,7 +74,7 @@ void cko_multidigest_print(cko_multidigest_ptr x) {
   printf("\nSHA512: %s",x->hex_sha512);
   printf("\nRIPEMD160: %s",x->hex_ripemd160);
   printf("\nSize: %lu",(unsigned long)x->size);
-  printf("\nVersion: %s\n",CKO_MULTIDIGEST_VERSION);
+  printf("\nVersion: %s\n",CKOEI_MULTIDIGEST_VERSION);
   if (strlen(x->note)>0)
     printf("Note: %s\n",x->note);
 }
@@ -536,6 +535,7 @@ int main(int argc,char* argv[]) {
     } else if (cko_arg_match(argv[1],"-f","--find")) {
       m.filename = argv[2];
       cko_multidigest_find(&m);
+      cko_multidigest_lookup(&m);
       return 0;
     } else if (cko_arg_match(argv[1],"-q","--query")) {
       m.filename = argv[2];
