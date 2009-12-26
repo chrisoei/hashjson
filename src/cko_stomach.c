@@ -31,6 +31,7 @@ int cko_multidigest_count(cko_multidigest_ptr x);
 void cko_multidigest_file(cko_multidigest_ptr ctx);
 void cko_multidigest_find(cko_multidigest_ptr ctx);
 void cko_multidigest_query(cko_multidigest_ptr x);
+void cko_multidigest_delete(cko_multidigest_ptr x);
 
 int cko_arg_match(char* x, char* s, char* l) {
   return (!strcmp(x,s)||!strcmp(x,l)) ? 1 : 0;
@@ -339,6 +340,49 @@ int cko_multidigest_count(cko_multidigest_ptr x) {
   return ans;
 }
 
+void cko_multidigest_delete(cko_multidigest_ptr x) {
+  int rc;
+  sqlite3 *dbh;
+  sqlite3_stmt* stmt;
+  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  static const char* query = "DELETE from checksum where filename=?;";
+
+  rc = sqlite3_open(dbfile,&dbh);
+  if (rc) {
+    fprintf(stderr,"Unable to open db.\n");
+    sqlite3_close(dbh);
+    exit(1);
+  }
+  rc = sqlite3_prepare(dbh,query,256,&stmt,NULL);
+  if (rc) {
+    fprintf(stderr,"Unable to prepare statement.\n");
+    sqlite3_close(dbh);
+    exit(1);
+  }
+  rc = sqlite3_bind_text(stmt,1,x->filename,-1,SQLITE_STATIC);
+  if (rc) {
+    fprintf(stderr,"Unable to bind filename.\n");
+    sqlite3_close(dbh);
+    exit(1);
+  }
+  rc = sqlite3_step(stmt);
+  
+  if (rc!=SQLITE_DONE) {
+    printf("ERROR in deletion.\n");
+    exit(1);
+  }
+  rc = sqlite3_finalize(stmt);
+  if (rc!=SQLITE_OK) {
+    fprintf(stderr,"Unable to finalize statement.\n");
+    exit(1);
+  }
+  rc = sqlite3_close(dbh);
+  if (rc!=SQLITE_OK) {
+    fprintf(stderr,"Unable to close db.\n");
+    exit(1);
+  }
+}
+
 void cko_multidigest_find(cko_multidigest_ptr x) {
   int rc;
   sqlite3 *dbh;
@@ -481,6 +525,7 @@ void cko_multidigest_query(cko_multidigest_ptr x) {
 void cko_multidigest_help() {
   printf("Usage: ckoei-multidigest -a|--add <filename>\n");
   printf("       ckoei-multidigest -c|--comment <comment> <filename>\n");
+  printf("       ckoei-multidigest    --delete <filename>\n");
   printf("       ckoei-multidigest -f|--find <filename>\n");
   printf("       ckoei-multidigest -h|--help\n");
   printf("       ckoei-multidigest -n|--note <note> <filename>\n");
@@ -531,6 +576,10 @@ int main(int argc,char* argv[]) {
       printf("Filename: %s\n",m.filename);
       cko_multidigest_file(&m);
       cko_multidigest_print(&m);
+      return 0;
+    } else if (!strcmp(argv[1],"--delete")) {
+      m.filename = argv[2];
+      cko_multidigest_delete(&m);
       return 0;
     } else if (cko_arg_match(argv[1],"-f","--find")) {
       m.filename = argv[2];
