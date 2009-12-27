@@ -1,5 +1,8 @@
 # use -DCYGWIN for cygwin
-CFLAGS=-O3 -I. -D_FILE_OFFSET_BITS=64 -DCYGWIN -D_LARGEFILE_SOURCE -DCKOEI_MULTIDIGEST_VERSION=\"2.6.0\"
+
+CKOEI_MULTIDIGEST_VERSION=2.6.0
+
+CFLAGS=-O3 -I. -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DCKOEI_MULTIDIGEST_VERSION=\"$(CKOEI_MULTIDIGEST_VERSION)\"
 
 all: ckoei-multidigest
 
@@ -39,4 +42,8 @@ test: ckoei-multidigest
 	diff test_vectors/vector2.test test_vectors/vector2.reference
 	diff test_vectors/vector2b.test test_vectors/vector2b.reference
 	diff test_vectors/vector3.test test_vectors/vector3.reference
+
+register:
+	export CKOEI_MULTIDIGEST_DB=../ckoei-multidigest.sqlite3; echo '\$\CKOEI_MULTIDIGEST_DB'
+
 
