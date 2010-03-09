@@ -1,16 +1,19 @@
 # use -DCYGWIN for cygwin
 
-CKOEI_MULTIDIGEST_VERSION=2.6.0
+CKOEI_MULTIDIGEST_VERSION=3.0.0
 
-CFLAGS=-O3 -I. -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DCKOEI_MULTIDIGEST_VERSION=\"$(CKOEI_MULTIDIGEST_VERSION)\"
+CFLAGS=-O3 -I. -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DCKOEI_MULTIDIGEST_VERSION=\"$(CKOEI_MULTIDIGEST_VERSION)\" -DCYGWIN
 
 all: ckoei-multidigest
 
 clean:
 	rm -f *.o ckoei-multidigest
 
-ckoei-multidigest: sha1.o sha2.o md5c.o adler32.o crc.o rmd160.o cko_stomach.c cko_types.o
-	gcc $(CFLAGS) -o ckoei-multidigest cko_stomach.c md5c.o sha1.o sha2.o adler32.o crc.o rmd160.o cko_types.o -lsqlite3 -lpthread -ldl
+ckoei-multidigest: sha1.o sha2.o md5c.o adler32.o crc.o rmd160.o cko_stomach.c cko_types.o stardate.o
+	gcc $(CFLAGS) -o ckoei-multidigest cko_stomach.c stardate.o md5c.o sha1.o sha2.o adler32.o crc.o rmd160.o cko_types.o -lsqlite3 -lpthread -ldl
+
+stardate.o: stardate.c
+	gcc $(CFLAGS) -c stardate.c
 
 sha1.o: sha1.c
 	gcc $(CFLAGS) -c sha1.c
