@@ -1,3 +1,3 @@
 
-double getStarDateFromTimestamp(char* ts);
+double getStarDateFromTimestamp(const char* ts);
 

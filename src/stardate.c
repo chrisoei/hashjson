@@ -37,7 +37,7 @@ double getStarDateFromTimeVal(struct timeval t) {
 	return s0 + (s1 - s0) * t.tv_usec / 1.0e6;
 }
 
-double getStarDateFromTimestamp(char* ts) {
+double getStarDateFromTimestamp(const char* ts) {
 	struct tm mytime;
 	char* rc = strptime(ts, "%Y-%m-%d %H:%M:%S", &mytime);
 	return getStarDateFromTM(&mytime);
