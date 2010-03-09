@@ -7,6 +7,7 @@
 #include <string.h>
 #include <rmd160.h>
 #include <sqlite3.h>
+#include <stardate.h>
 
 typedef struct {
   char* filename;
@@ -449,7 +450,7 @@ void cko_multidigest_lookup(cko_multidigest_ptr x) {
     exit(1);
   }
   while ((rc = sqlite3_step(stmt))==SQLITE_ROW) {
-      printf("Comment %s: %s\n",sqlite3_column_text(stmt,0),sqlite3_column_text(stmt,1));
+      printf("Comment %0.12lf: %s\n",getStarDateFromTimestamp(sqlite3_column_text(stmt,0)),sqlite3_column_text(stmt,1));
   }
   rc = sqlite3_finalize(stmt);
   if (rc!=SQLITE_OK) {
@@ -469,7 +470,7 @@ void cko_multidigest_query(cko_multidigest_ptr x) {
   sqlite3 *dbh;
   sqlite3_stmt* stmt;
   char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
-  static const char* query = "SELECT sha512,note from checksum where filename=?;";
+  static const char* query = "SELECT sha512,note,dts from checksum where filename=?;";
 
   rc = sqlite3_open(dbfile,&dbh);
   if (rc) {
@@ -500,9 +501,9 @@ void cko_multidigest_query(cko_multidigest_ptr x) {
 
       cko_multidigest_file(x);
       if (strcmp(x->hex_sha512,sqlite3_column_text(stmt,0))) {
-        printf("ERROR!");
+        printf("CKOEI_ERROR: Mismatch %0.12lf",getStarDateFromTimestamp(sqlite3_column_text(stmt,2)));
       } else {
-        printf("OK.");
+        printf("CKOEI_OK: Matches %0.12lf",getStarDateFromTimestamp(sqlite3_column_text(stmt,2)));
       }
       if (strlen(sqlite3_column_text(stmt,1))>0) {
         printf(" Note: %s", sqlite3_column_text(stmt,1));

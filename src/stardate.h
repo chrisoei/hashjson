@@ -1,0 +1,3 @@
+
+double getStarDateFromTimestamp(char* ts);
+
