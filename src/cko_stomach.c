@@ -69,6 +69,8 @@ void cko_multidigest_update(cko_multidigest_ptr x,unsigned char* s,cko_u32 l) {
 
 
 void cko_multidigest_print(cko_multidigest_ptr x) {
+  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  printf("DB: %s\n", dbfile);
   printf("Adler32: %s",x->hex_adler32);
   printf("\nCRC32: %s",x->hex_crc32);
   printf("\nMD5: %s",x->hex_md5);
@@ -535,6 +537,7 @@ void cko_multidigest_help() {
   printf("       ckoei-multidigest -x|--checksum <filename>\n");
   printf("       ckoei-multidigest\n");
   printf("export CKOEI_MULTIDIGEST_DB=<database filename>\n");
+  printf("                           =%s\n",getenv("CKOEI_MULTIDIGEST_DB"));
 }
 
 void cko_multidigest_string(cko_multidigest_ptr ctx, char* s) {
