@@ -4,6 +4,7 @@ create table checksum (
   crc32 char(8),
   md5 char(32),
   sha1 char(40),
+  sha256 char(64),
   sha512 char(128),
   ripemd160 char(40),
   size integer,
