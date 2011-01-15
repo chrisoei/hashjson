@@ -14,6 +14,7 @@ typedef struct {
   cko_u32 chunksize;
   MD5_CTX md5_ctx;
   sha1_context sha1_ctx;
+  sha256_ctx sha256_ctx;
   sha512_ctx sha512_ctx;
   ripemd160_ctx_t ripemd160_ctx;
   cko_u32 adler32;
@@ -23,6 +24,7 @@ typedef struct {
   char hex_crc32[8+1];
   char hex_md5[32+1];
   char hex_sha1[40+1];
+  char hex_sha256[64+1];
   char hex_sha512[128+1];
   char hex_ripemd160[40+1];
   char* note;
@@ -47,6 +49,7 @@ void cko_multidigest_init(cko_multidigest_ptr x) {
   x->size=0;
   MD5Init(&(x->md5_ctx));
   sha1_starts(&(x->sha1_ctx));
+  sha256_init(&(x->sha256_ctx));
   sha512_init(&(x->sha512_ctx));
   x->adler32 = 1L;
   crcFastInit(&(x->crc32));
@@ -61,6 +64,7 @@ void cko_multidigest_update(cko_multidigest_ptr x,unsigned char* s,cko_u32 l) {
   x->size += l;
   MD5Update(&(x->md5_ctx),s,l);
   sha1_update(&(x->sha1_ctx),s,l);
+  sha256_update(&(x->sha256_ctx),s,l);
   sha512_update(&(x->sha512_ctx),s,l);
   x->adler32 = update_adler32(x->adler32,s,l); // note that this take int, not uint
   crcFastUpdate(&(x->crc32),s,l);
@@ -75,6 +79,7 @@ void cko_multidigest_print(cko_multidigest_ptr x) {
   printf("\nCRC32: %s",x->hex_crc32);
   printf("\nMD5: %s",x->hex_md5);
   printf("\nSHA1: %s",x->hex_sha1);
+  printf("\nSHA256: %s",x->hex_sha256);
   printf("\nSHA512: %s",x->hex_sha512);
   printf("\nRIPEMD160: %s",x->hex_ripemd160);
   printf("\nSize: %lu",(unsigned long)x->size);
@@ -86,6 +91,7 @@ void cko_multidigest_print(cko_multidigest_ptr x) {
 void cko_multidigest_final(cko_multidigest_ptr x) {
   cko_u8 d_md5[18];
   cko_u8 d_sha1[20];
+  cko_u8 d_sha256[32];
   cko_u8 d_sha512[64];
   cko_u8 d_ripemd160[160/8];
   int i;
@@ -94,6 +100,7 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
 
   MD5Final(d_md5,&(x->md5_ctx));
   sha1_finish(&(x->sha1_ctx),d_sha1);
+  sha256_final(&(x->sha256_ctx),d_sha256);
   sha512_final(&(x->sha512_ctx),d_sha512);
   crcFastFinal(&(x->crc32));
 
@@ -104,6 +111,9 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   }
   for (i=0;i<20;i++) {
     sprintf(x->hex_sha1+i*2,"%02x",(cko_s16)d_sha1[i]);
+  }
+  for (i=0;i<32;i++) {
+    sprintf(x->hex_sha256+i*2,"%02x",(cko_s16)d_sha256[i]);
   }
   for (i=0;i<64;i++) {
     sprintf(x->hex_sha512+i*2,"%02x",(cko_s16)d_sha512[i]);
@@ -183,7 +193,7 @@ void cko_multidigest_insert(cko_multidigest_ptr x) {
   int rc;
   sqlite3 *dbh;
   sqlite3_stmt* stmt;
-  static const char* ins = "INSERT INTO checksum(filename,adler32,crc32,md5,sha1,sha512,ripemd160,size,note) VALUES(?,?,?,?,?,?,?,?,?);";
+  static const char* ins = "INSERT INTO checksum(filename,adler32,crc32,md5,sha1,sha256,sha512,ripemd160,size,note) VALUES(?,?,?,?,?,?,?,?,?,?);";
   char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
 
   if ((x->filename)&&(dbfile!=NULL)) {
@@ -230,25 +240,31 @@ void cko_multidigest_insert(cko_multidigest_ptr x) {
       sqlite3_close(dbh);
       exit(1);
     }
-    rc = sqlite3_bind_text(stmt,6,x->hex_sha512,-1,SQLITE_STATIC);
+    rc = sqlite3_bind_text(stmt,6,x->hex_sha256,-1,SQLITE_STATIC);
+    if (rc) {
+      fprintf(stderr,"Unable to bind sha256.\n");
+      sqlite3_close(dbh);
+      exit(1);
+    }
+    rc = sqlite3_bind_text(stmt,7,x->hex_sha512,-1,SQLITE_STATIC);
     if (rc) {
       fprintf(stderr,"Unable to bind sha512.\n");
       sqlite3_close(dbh);
       exit(1);
     }
-    rc = sqlite3_bind_text(stmt,7,x->hex_ripemd160,-1,SQLITE_STATIC);
+    rc = sqlite3_bind_text(stmt,8,x->hex_ripemd160,-1,SQLITE_STATIC);
     if (rc) {
       fprintf(stderr,"Unable to bind ripemd160.\n");
       sqlite3_close(dbh);
       exit(1);
     }
-    rc = sqlite3_bind_int64(stmt,8,x->size);
+    rc = sqlite3_bind_int64(stmt,9,x->size);
     if (rc) {
       fprintf(stderr,"Unable to bind size.\n");
       sqlite3_close(dbh);
       exit(1);
     }
-    rc = sqlite3_bind_text(stmt,9,x->note,-1,SQLITE_STATIC);
+    rc = sqlite3_bind_text(stmt,10,x->note,-1,SQLITE_STATIC);
     if (rc) {
       fprintf(stderr,"Unable to bind note.\n");
       sqlite3_close(dbh);
