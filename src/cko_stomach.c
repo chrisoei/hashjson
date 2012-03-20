@@ -138,7 +138,7 @@ void cko_multidigest_comment(cko_multidigest_ptr x,char* cmt) {
   sqlite3_stmt* stmt;
   static const char* ins = "INSERT INTO annotation(md5,sha1,comment) VALUES(?,?,?);";
   char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
-  if ((x->filename)&&(dbfile!=NULL)) {
+  if (dbfile!=NULL) {
     if (strlen(dbfile)<1) return;
     rc = sqlite3_open(dbfile,&dbh);
     if (rc) {
@@ -186,6 +186,9 @@ void cko_multidigest_comment(cko_multidigest_ptr x,char* cmt) {
       fprintf(stderr,"Unable to close db.\n");
       exit(1);
     }
+  } else {
+      fprintf(stderr,"DB file not set.\n");
+      exit(1);
   }
 }
 
@@ -549,6 +552,7 @@ void cko_multidigest_help() {
   printf("       ckoei-multidigest -h|--help\n");
   printf("       ckoei-multidigest -n|--note <note> <filename>\n");
   printf("       ckoei-multidigest -s|--string <string>\n");
+  printf("       ckoei-multidigest -S|--string-comment <string> <comment>\n");
   printf("       ckoei-multidigest -q|--query <filename>\n");
   printf("       ckoei-multidigest -x|--checksum <filename>\n");
   printf("       ckoei-multidigest\n");
@@ -638,6 +642,10 @@ int main(int argc,char* argv[]) {
       m.filename = argv[3];
       cko_multidigest_file(&m);
       cko_multidigest_comment(&m,argv[2]);
+      return 0;
+    } else if (cko_arg_match(argv[1],"-S","--string-comment")) {
+      cko_multidigest_string(&m,argv[2]);
+      cko_multidigest_comment(&m,argv[3]);
       return 0;
     } else {
       cko_multidigest_help();
