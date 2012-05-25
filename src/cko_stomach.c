@@ -568,8 +568,10 @@ void cko_multidigest_help() {
   printf("       ckoei-multidigest -q|--query <filename>\n");
   printf("       ckoei-multidigest -x|--checksum <filename>\n");
   printf("       ckoei-multidigest\n");
+  printf("\ngit config <scope> ckoei.multidigest-db <database filename>\n");
   printf("export CKOEI_MULTIDIGEST_DB=<database filename>\n");
-  printf("                           =%s\n",cko_get_db_file());
+  printf("\nVersion: %s\n",CKOEI_MULTIDIGEST_VERSION);
+  printf("DB: %s\n\n",cko_get_db_file());
 }
 
 void cko_multidigest_string(cko_multidigest_ptr ctx, char* s) {

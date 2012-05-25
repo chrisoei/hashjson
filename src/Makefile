@@ -1,6 +1,6 @@
 # use -DCYGWIN for cygwin
 
-CKOEI_MULTIDIGEST_VERSION=4.2.1
+CKOEI_MULTIDIGEST_VERSION=$(shell git describe --always --tags)
 
 CFLAGS=-O3 -I. -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DCKOEI_MULTIDIGEST_VERSION=\"$(CKOEI_MULTIDIGEST_VERSION)\" -DCYGWIN
 
@@ -51,5 +51,4 @@ test: ckoei-multidigest
 
 register:
 	export CKOEI_MULTIDIGEST_DB=../ckoei-multidigest.sqlite3; echo '\$\CKOEI_MULTIDIGEST_DB'
-
 
