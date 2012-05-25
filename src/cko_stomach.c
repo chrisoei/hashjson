@@ -557,7 +557,7 @@ void cko_multidigest_query(cko_multidigest_ptr x) {
 }
 
 void cko_multidigest_help() {
-  printf("Usage: ckoei-multidigest -a|--add <filename>\n");
+  printf("\nUsage: ckoei-multidigest -a|--add <filename>\n");
   printf("       ckoei-multidigest -c|--comment <comment> <filename>\n");
   printf("       ckoei-multidigest    --delete <filename>\n");
   printf("       ckoei-multidigest -f|--find <filename>\n");
