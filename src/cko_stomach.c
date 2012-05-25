@@ -40,6 +40,18 @@ int cko_arg_match(char* x, char* s, char* l) {
   return (!strcmp(x,s)||!strcmp(x,l)) ? 1 : 0;
 }
 
+char* cko_get_db_file() {
+  static char buf[4096];
+  FILE *sysfp = popen("git config --get ckoei.multidigest-db", "r");
+  fgets(buf, 4096, sysfp);
+  pclose(sysfp);
+  int l = strlen(buf);
+  if (l>0) {
+    buf[l-1] = '\0';
+    return buf;
+  }
+  return getenv("CKOEI_MULTIDIGEST_DB");
+}
 
 void cko_multidigest_init(cko_multidigest_ptr x) {
   x->note = "";
@@ -73,7 +85,7 @@ void cko_multidigest_update(cko_multidigest_ptr x,unsigned char* s,cko_u32 l) {
 
 
 void cko_multidigest_print(cko_multidigest_ptr x) {
-  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  char* dbfile = cko_get_db_file();
   printf("DB: %s\n", dbfile);
   printf("Adler32: %s",x->hex_adler32);
   printf("\nCRC32: %s",x->hex_crc32);
@@ -137,7 +149,7 @@ void cko_multidigest_comment(cko_multidigest_ptr x,char* cmt) {
   sqlite3 *dbh;
   sqlite3_stmt* stmt;
   static const char* ins = "INSERT INTO annotation(md5,sha1,comment) VALUES(?,?,?);";
-  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  char* dbfile = cko_get_db_file();
   if (dbfile!=NULL) {
     if (strlen(dbfile)<1) return;
     rc = sqlite3_open(dbfile,&dbh);
@@ -197,7 +209,7 @@ void cko_multidigest_insert(cko_multidigest_ptr x) {
   sqlite3 *dbh;
   sqlite3_stmt* stmt;
   static const char* ins = "INSERT INTO checksum(filename,adler32,crc32,md5,sha1,sha256,sha512,ripemd160,size,note) VALUES(?,?,?,?,?,?,?,?,?,?);";
-  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  char* dbfile = cko_get_db_file();
 
   if ((x->filename)&&(dbfile!=NULL)) {
     if (strlen(dbfile)<1) return;
@@ -327,7 +339,7 @@ int cko_multidigest_count(cko_multidigest_ptr x) {
   sqlite3 *dbh;
   sqlite3_stmt* stmt;
   int rc;
-  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  char* dbfile = cko_get_db_file();
   if ((x->filename)&&(dbfile!=NULL)) {
     static const char* query = "SELECT count(*) from checksum where filename=?;";
     rc = sqlite3_open(dbfile,&dbh);
@@ -366,7 +378,7 @@ void cko_multidigest_delete(cko_multidigest_ptr x) {
   int rc;
   sqlite3 *dbh;
   sqlite3_stmt* stmt;
-  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  char* dbfile = cko_get_db_file();
   static const char* query = "DELETE from checksum where filename=?;";
 
   rc = sqlite3_open(dbfile,&dbh);
@@ -409,7 +421,7 @@ void cko_multidigest_find(cko_multidigest_ptr x) {
   int rc;
   sqlite3 *dbh;
   sqlite3_stmt* stmt;
-  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  char* dbfile = cko_get_db_file();
   cko_multidigest_file(x);
   static const char* query = "SELECT filename from checksum where sha512=?;";
   rc = sqlite3_open(dbfile,&dbh);
@@ -450,7 +462,7 @@ void cko_multidigest_lookup(cko_multidigest_ptr x) {
   int rc;
   sqlite3 *dbh;
   sqlite3_stmt* stmt;
-  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  char* dbfile = cko_get_db_file();
   static const char* query = "SELECT dts,comment from annotation where sha1=? ORDER BY DTS;";
   rc = sqlite3_open(dbfile,&dbh);
   if (rc) {
@@ -490,7 +502,7 @@ void cko_multidigest_query(cko_multidigest_ptr x) {
   int rc;
   sqlite3 *dbh;
   sqlite3_stmt* stmt;
-  char* dbfile = getenv("CKOEI_MULTIDIGEST_DB");
+  char* dbfile = cko_get_db_file();
   static const char* query = "SELECT sha512,note,dts from checksum where filename=?;";
 
   rc = sqlite3_open(dbfile,&dbh);
@@ -557,7 +569,7 @@ void cko_multidigest_help() {
   printf("       ckoei-multidigest -x|--checksum <filename>\n");
   printf("       ckoei-multidigest\n");
   printf("export CKOEI_MULTIDIGEST_DB=<database filename>\n");
-  printf("                           =%s\n",getenv("CKOEI_MULTIDIGEST_DB"));
+  printf("                           =%s\n",cko_get_db_file());
 }
 
 void cko_multidigest_string(cko_multidigest_ptr ctx, char* s) {
