@@ -100,6 +100,24 @@ void cko_multidigest_print(cko_multidigest_ptr x) {
     printf("Note: %s\n",x->note);
 }
 
+void cko_multidigest_print_json(cko_multidigest_ptr x) {
+  char* dbfile = cko_get_db_file();
+  printf("{\n");
+  printf("  \"db\": \"%s\"\n", dbfile);
+  printf("  \"adler32\": \"%s\"",x->hex_adler32);
+  printf("\n  \"crc32\": \"%s\"",x->hex_crc32);
+  printf("\n  \"md5\": \"%s\"",x->hex_md5);
+  printf("\n  \"sha1\": \"%s\"",x->hex_sha1);
+  printf("\n  \"sha256\": \"%s\"",x->hex_sha256);
+  printf("\n  \"sha512\": \"%s\"",x->hex_sha512);
+  printf("\n  \"ripemd160\": \"%s\"",x->hex_ripemd160);
+  printf("\n  \"size\": \"%lu\"",(unsigned long)x->size);
+  printf("\n  \"version\": \"%s\"\n",CKOEI_MULTIDIGEST_VERSION);
+  if (strlen(x->note)>0)
+    printf("  \"note\": \"%s\"\n",x->note);
+  printf("}\n");
+}
+
 void cko_multidigest_final(cko_multidigest_ptr x) {
   cko_u8 d_md5[18];
   cko_u8 d_sha1[20];
@@ -586,7 +604,7 @@ int main(int argc,char* argv[]) {
 
   if (argc==1) {
     cko_multidigest_file(&m);
-    cko_multidigest_print(&m);
+    cko_multidigest_print_json(&m);
     return 0;
   } else if (argc==2) {
     if (cko_arg_match(argv[1],"-h","--help")) {
@@ -606,14 +624,14 @@ int main(int argc,char* argv[]) {
         return 0;
       }
       cko_multidigest_file(&m);
-      cko_multidigest_print(&m);
+      cko_multidigest_print_json(&m);
       cko_multidigest_insert(&m);
       return 0;
     } else if (cko_arg_match(argv[1],"-x","--checksum")) {
       m.filename = argv[2];
       printf("Filename: %s\n",m.filename);
       cko_multidigest_file(&m);
-      cko_multidigest_print(&m);
+      cko_multidigest_print_json(&m);
       return 0;
     } else if (!strcmp(argv[1],"--delete")) {
       m.filename = argv[2];
@@ -632,7 +650,7 @@ int main(int argc,char* argv[]) {
       return 0;
     } else if (cko_arg_match(argv[1],"-s","--string")) {
       cko_multidigest_string(&m,argv[2]);
-      cko_multidigest_print(&m);
+      cko_multidigest_print_json(&m);
       cko_multidigest_lookup(&m);
       return 0;
     } else {
@@ -649,7 +667,7 @@ int main(int argc,char* argv[]) {
       }
       m.note = argv[2];
       cko_multidigest_file(&m);
-      cko_multidigest_print(&m);
+      cko_multidigest_print_json(&m);
       cko_multidigest_insert(&m);
       return 0;
     } else if (cko_arg_match(argv[1],"-c","--comment")) {
