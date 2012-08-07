@@ -12,8 +12,8 @@ clean:
 ckoei-multidigest: sha1.o md5c.o adler32.o crc.o rmd160.o cko_stomach.c cko_types.o stardate.o
 	gcc $(CFLAGS) -o ckoei-multidigest cko_stomach.c stardate.o md5c.o sha1.o adler32.o crc.o rmd160.o cko_types.o -lsqlite3 -lpthread -ldl
 
-hashjson: sha1.o md5c.o adler32.o crc.o rmd160.o cko_stomach.c cko_types.o hashjson.o
-	gcc $(CFLAGS) -o hashjson hashjson.c stardate.o md5c.o sha1.o adler32.o crc.o rmd160.o cko_types.o -lssl -lcrypto -lpthread -ldl
+hashjson: adler32.o crc.o cko_types.o hashjson.o
+	gcc $(CFLAGS) -o hashjson hashjson.c adler32.o crc.o cko_types.o -lssl -lcrypto -lpthread -ldl
 
 stardate.o: stardate.c
 	gcc $(CFLAGS) -c stardate.c
