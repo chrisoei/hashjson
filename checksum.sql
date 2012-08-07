@@ -8,11 +8,11 @@ create table checksum (
   sha512 char(128),
   ripemd160 char(40),
   size integer,
-  note varchar default null,
   dts char(19) default current_timestamp);
 
 create table annotation (
   md5 char(32),
   sha1 char(40),
+  sha256 char(64),
   comment varchar default null,
   dts char(19) default current_timestamp);
