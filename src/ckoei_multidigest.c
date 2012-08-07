@@ -56,7 +56,7 @@ void cko_multidigest_comment(cko_multidigest_ptr x,char* cmt) {
     }
     rc = sqlite3_prepare(dbh,ins,256,&stmt,NULL);
     if (rc) {
-      fprintf(stderr,"Unable to prepare statement.\n");
+      fprintf(stderr,"Unable to prepare insert annotation statement.\n");
       sqlite3_close(dbh);
       exit(1);
     }
@@ -110,7 +110,7 @@ void cko_multidigest_insert(cko_multidigest_ptr x) {
   int rc;
   sqlite3 *dbh;
   sqlite3_stmt* stmt;
-  static const char* ins = "INSERT INTO checksum(filename,adler32,crc32,md5,sha1,sha256,sha512,ripemd160,size) VALUES(?,?,?,?,?,?,?,?,?,?);";
+  static const char* ins = "INSERT INTO checksum(filename,adler32,crc32,md5,sha1,sha256,sha512,ripemd160,size) VALUES(?,?,?,?,?,?,?,?,?);";
   char* dbfile = cko_get_db_file();
 
   if ((x->filename)&&(dbfile!=NULL)) {
@@ -123,7 +123,7 @@ void cko_multidigest_insert(cko_multidigest_ptr x) {
     }
     rc = sqlite3_prepare(dbh,ins,256,&stmt,NULL);
     if (rc) {
-      fprintf(stderr,"Unable to prepare statement.\n");
+      fprintf(stderr,"Unable to prepare insert checksum statement.\n");
       sqlite3_close(dbh);
       exit(1);
     }
@@ -246,7 +246,7 @@ int cko_multidigest_count(cko_multidigest_ptr x) {
     }
     rc = sqlite3_prepare(dbh,query,256,&stmt,NULL);
     if (rc) {
-      fprintf(stderr,"Unable to prepare statement.\n");
+      fprintf(stderr,"Unable to prepare count statement.\n");
       sqlite3_close(dbh);
       exit(1);
     }
@@ -285,7 +285,7 @@ void cko_multidigest_delete(cko_multidigest_ptr x) {
   }
   rc = sqlite3_prepare(dbh,query,256,&stmt,NULL);
   if (rc) {
-    fprintf(stderr,"Unable to prepare statement.\n");
+    fprintf(stderr,"Unable to prepare delete statement.\n");
     sqlite3_close(dbh);
     exit(1);
   }
@@ -430,12 +430,9 @@ void cko_multidigest_query(cko_multidigest_ptr x) {
 
       cko_multidigest_file(x);
       if (strcmp(x->hex_sha512,sqlite3_column_text(stmt,0))) {
-        printf("CKOEI_ERROR: Mismatch %0.12lf",getStarDateFromTimestamp(sqlite3_column_text(stmt,2)));
+        printf("CKOEI_ERROR: Mismatch %0.12lf",getStarDateFromTimestamp(sqlite3_column_text(stmt,1)));
       } else {
-        printf("CKOEI_OK: Matches %0.12lf",getStarDateFromTimestamp(sqlite3_column_text(stmt,2)));
-      }
-      if (strlen(sqlite3_column_text(stmt,1))>0) {
-        printf(" Note: %s", sqlite3_column_text(stmt,1));
+        printf("CKOEI_OK: Matches %0.12lf",getStarDateFromTimestamp(sqlite3_column_text(stmt,1)));
       }
       printf("\n");
       break;
