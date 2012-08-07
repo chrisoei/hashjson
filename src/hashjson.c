@@ -110,7 +110,7 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
     sprintf(x->hex_sha512+i*2,"%02x",(cko_s16)d_sha512[i]);
   }
 
-  for (i=0;i<20;i+=4 ) {
+  for (i=0;i<20;i++ ) {
     sprintf(x->hex_ripemd160+i*2,"%02x",(cko_s16)d_ripemd160[i]);
   }
 
