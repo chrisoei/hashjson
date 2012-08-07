@@ -64,5 +64,11 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   for (i=0;i<20;i++ ) {
     sprintf(x->hex_ripemd160+i*2,"%02x",(cko_s16)d_ripemd160[i]);
   }
-
+  x->hex_adler32[8] = '\0';
+  x->hex_crc32[8] = '\0';
+  x->hex_md5[32] = '\0';
+  x->hex_sha1[40] = '\0';
+  x->hex_sha256[64] = '\0';
+  x->hex_sha512[128] = '\0';
+  x->hex_ripemd160[40] = '\0';
 }
