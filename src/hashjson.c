@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <global.h>
 #include <string.h>
 #include <cko_types.h>
 #include <openssl/md5.h>
 #include <openssl/ripemd.h>
 #include <openssl/sha.h>
+#include <zlib.h>
 
 typedef struct {
   char* filename;
@@ -43,8 +43,8 @@ void cko_multidigest_init(cko_multidigest_ptr x) {
   SHA1_Init(&(x->sha1_ctx));
   SHA256_Init(&(x->sha256_ctx));
   SHA512_Init(&(x->sha512_ctx));
-  x->adler32 = 1L;
-  crcFastInit(&(x->crc32));
+  x->adler32 = adler32(0L, Z_NULL, 0);
+  x->crc32 = crc32(0L, Z_NULL, 0);
   RIPEMD160_Init(&(x->ripemd160_ctx));
 }
 
@@ -58,8 +58,8 @@ void cko_multidigest_update(cko_multidigest_ptr x, unsigned char* s,cko_u32 l) {
   SHA1_Update(&(x->sha1_ctx),s,l);
   SHA256_Update(&(x->sha256_ctx),s,l);
   SHA512_Update(&(x->sha512_ctx),s,l);
-  x->adler32 = update_adler32(x->adler32,s,l); // note that this take int, not uint
-  crcFastUpdate(&(x->crc32),s,l);
+  x->adler32 = adler32(x->adler32,s,l); // note that this take int, not uint
+  x->crc32 = crc32(x->crc32,s,l);
   RIPEMD160_Update(&(x->ripemd160_ctx),s,l);
 }
 
@@ -78,7 +78,6 @@ void cko_multidigest_print_json(cko_multidigest_ptr x) {
 }
 
 void cko_multidigest_final(cko_multidigest_ptr x) {
-  void crcFastFinal();
   cko_u8 d_md5[18];
   cko_u8 d_sha1[20];
   cko_u8 d_sha256[32];
@@ -93,7 +92,6 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   SHA256_Final(d_sha256, &(x->sha256_ctx));
   SHA512_Final(d_sha512, &(x->sha512_ctx));
   RIPEMD160_Final(d_ripemd160, &(x->ripemd160_ctx));
-  crcFastFinal(&(x->crc32));
 
   sprintf(x->hex_adler32,"%08x",x->adler32);
   sprintf(x->hex_crc32,"%08x",x->crc32);
