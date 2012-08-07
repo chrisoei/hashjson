@@ -11,8 +11,9 @@ child = child_process.execFile "hashjson", [],
     if err?
       console.error stderr
     else
-      j = JSON.parse stdout
-      j.string = s
+      j =
+        string: s
+        hash: JSON.parse stdout
       console.log j
 
 child.stdin.write s
