@@ -1,10 +1,19 @@
 #!/usr/bin/env coffee
 
-{exec} = require "child_process"
+child_process = require "child_process"
+fs = require "fs"
 
 s = process.argv[2]
 
-exec "echo -n #{s}|hashjson", (err, stdout, stderr) ->
-  j = JSON.parse stdout
-  console.log j
+child = child_process.execFile "hashjson", [],
+  stdio: 'pipe',
+  (err, stdout, stderr) ->
+    if err?
+      console.error stderr
+    else
+      j = JSON.parse stdout
+      j.string = s
+      console.log j
 
+child.stdin.write s
+child.stdin.end()
