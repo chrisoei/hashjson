@@ -3,17 +3,17 @@
 #include <global.h>
 #include <md5.h>
 #include <sha1.h>
-#include <sha2.h>
 #include <string.h>
 #include <rmd160.h>
+#include <openssl/sha.h>
 
 typedef struct {
   char* filename;
   cko_u32 chunksize;
   MD5_CTX md5_ctx;
   sha1_context sha1_ctx;
-  sha256_ctx sha256_ctx;
-  sha512_ctx sha512_ctx;
+  SHA256_CTX sha256_ctx;
+  SHA512_CTX sha512_ctx;
   ripemd160_ctx_t ripemd160_ctx;
   cko_u32 adler32;
   cko_u32 crc32;
@@ -41,8 +41,8 @@ void cko_multidigest_init(cko_multidigest_ptr x) {
   x->size=0;
   MD5Init(&(x->md5_ctx));
   sha1_starts(&(x->sha1_ctx));
-  sha256_init(&(x->sha256_ctx));
-  sha512_init(&(x->sha512_ctx));
+  SHA256_Init(&(x->sha256_ctx));
+  SHA512_Init(&(x->sha512_ctx));
   x->adler32 = 1L;
   crcFastInit(&(x->crc32));
   MDinit(&(x->ripemd160_ctx));
@@ -56,8 +56,8 @@ void cko_multidigest_update(cko_multidigest_ptr x, unsigned char* s,cko_u32 l) {
   x->size += l;
   MD5Update(&(x->md5_ctx),s,l);
   sha1_update(&(x->sha1_ctx),s,l);
-  sha256_update(&(x->sha256_ctx),s,l);
-  sha512_update(&(x->sha512_ctx),s,l);
+  SHA256_Update(&(x->sha256_ctx),s,l);
+  SHA512_Update(&(x->sha512_ctx),s,l);
   x->adler32 = update_adler32(x->adler32,s,l); // note that this take int, not uint
   crcFastUpdate(&(x->crc32),s,l);
   ripemd160_update(&(x->ripemd160_ctx),s,l);
@@ -90,8 +90,8 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
 
   MD5Final(d_md5,&(x->md5_ctx));
   sha1_finish(&(x->sha1_ctx),d_sha1);
-  sha256_final(&(x->sha256_ctx),d_sha256);
-  sha512_final(&(x->sha512_ctx),d_sha512);
+  SHA256_Final(d_sha256, &(x->sha256_ctx));
+  SHA512_Final(d_sha512, &(x->sha512_ctx));
   crcFastFinal(&(x->crc32));
 
   sprintf(x->hex_adler32,"%08x",x->adler32);
