@@ -1,20 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <global.h>
-#include <md5.h>
-#include <sha1.h>
 #include <string.h>
-#include <rmd160.h>
+#include <cko_types.h>
+#include <openssl/md5.h>
+#include <openssl/ripemd.h>
 #include <openssl/sha.h>
 
 typedef struct {
   char* filename;
   cko_u32 chunksize;
   MD5_CTX md5_ctx;
-  sha1_context sha1_ctx;
+  SHA_CTX sha1_ctx;
   SHA256_CTX sha256_ctx;
   SHA512_CTX sha512_ctx;
-  ripemd160_ctx_t ripemd160_ctx;
+  RIPEMD160_CTX ripemd160_ctx;
   cko_u32 adler32;
   cko_u32 crc32;
   cko_u64 size;
@@ -39,13 +39,13 @@ void cko_multidigest_init(cko_multidigest_ptr x) {
   x->filename=NULL;
   x->chunksize=1024*1024;
   x->size=0;
-  MD5Init(&(x->md5_ctx));
-  sha1_starts(&(x->sha1_ctx));
+  MD5_Init(&(x->md5_ctx));
+  SHA1_Init(&(x->sha1_ctx));
   SHA256_Init(&(x->sha256_ctx));
   SHA512_Init(&(x->sha512_ctx));
   x->adler32 = 1L;
   crcFastInit(&(x->crc32));
-  MDinit(&(x->ripemd160_ctx));
+  RIPEMD160_Init(&(x->ripemd160_ctx));
 }
 
 // CKODEBUG FIXIT: is unsigned int big enough?
@@ -54,13 +54,13 @@ void cko_multidigest_update(cko_multidigest_ptr x, unsigned char* s,cko_u32 l) {
   void crcFastUpdate();
 
   x->size += l;
-  MD5Update(&(x->md5_ctx),s,l);
-  sha1_update(&(x->sha1_ctx),s,l);
+  MD5_Update(&(x->md5_ctx),s,l);
+  SHA1_Update(&(x->sha1_ctx),s,l);
   SHA256_Update(&(x->sha256_ctx),s,l);
   SHA512_Update(&(x->sha512_ctx),s,l);
   x->adler32 = update_adler32(x->adler32,s,l); // note that this take int, not uint
   crcFastUpdate(&(x->crc32),s,l);
-  ripemd160_update(&(x->ripemd160_ctx),s,l);
+  RIPEMD160_Update(&(x->ripemd160_ctx),s,l);
 }
 
 void cko_multidigest_print_json(cko_multidigest_ptr x) {
@@ -88,10 +88,11 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   int len;
   static const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-  MD5Final(d_md5,&(x->md5_ctx));
-  sha1_finish(&(x->sha1_ctx),d_sha1);
+  MD5_Final(d_md5,&(x->md5_ctx));
+  SHA1_Final(d_sha1,&(x->sha1_ctx));
   SHA256_Final(d_sha256, &(x->sha256_ctx));
   SHA512_Final(d_sha512, &(x->sha512_ctx));
+  RIPEMD160_Final(d_ripemd160, &(x->ripemd160_ctx));
   crcFastFinal(&(x->crc32));
 
   sprintf(x->hex_adler32,"%08x",x->adler32);
@@ -108,16 +109,9 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   for (i=0;i<64;i++) {
     sprintf(x->hex_sha512+i*2,"%02x",(cko_s16)d_sha512[i]);
   }
-  MDfinish(&(x->ripemd160_ctx),"");
 
   for (i=0;i<20;i+=4 ) {
-    d_ripemd160[i] = x->ripemd160_ctx.MDbuf[i>>2];
-    d_ripemd160[i+1] = (x->ripemd160_ctx.MDbuf[i>>2]>>8);
-    d_ripemd160[i+2] = (x->ripemd160_ctx.MDbuf[i>>2]>>16);
-    d_ripemd160[i+3] = (x->ripemd160_ctx.MDbuf[i>>2]>>24);
-  }
-  for (i=0;i<20;i++) {
-    sprintf(x->hex_ripemd160+i*2,"%02x",d_ripemd160[i]);
+    sprintf(x->hex_ripemd160+i*2,"%02x",(cko_s16)d_ripemd160[i]);
   }
 
 }
