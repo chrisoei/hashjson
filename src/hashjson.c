@@ -49,8 +49,11 @@ void cko_multidigest_file(cko_multidigest_ptr ctx) {
 int main(int argc,char* argv[]) {
   cko_types_test();
   cko_multidigest_t m;
-  cko_multidigest_init(&m);
 
+  cko_multidigest_init(&m);
+  if (argc == 2) {
+    m.filename = argv[1];
+  }
   cko_multidigest_file(&m);
   cko_multidigest_print_json(&m);
   return 0;
