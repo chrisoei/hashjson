@@ -19,11 +19,7 @@ void cko_multidigest_print_json(cko_multidigest_ptr x) {
 void cko_multidigest_file(cko_multidigest_ptr ctx) {
   FILE* fp;
   if (ctx->filename!=NULL) {
-#ifdef CYGWIN
     fp=(FILE*)fopen(ctx->filename,"r");
-#else
-    fp=(FILE*)fopen64(ctx->filename,"r");
-#endif
   } else {
     fp=stdin;
   }
