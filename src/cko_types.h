@@ -13,7 +13,7 @@ typedef int cko_s32;
 //typedef long cko_s64;
 typedef long long cko_s64;
 
-int cko_types_test();
+void cko_types_test();
 
 #include <stdio.h>
 #include <stdlib.h>
