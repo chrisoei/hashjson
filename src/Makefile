@@ -7,7 +7,7 @@ CFLAGS=-O3 -I. -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -DHASHJSON_VERSION=\"$
 all: hashjson hashyaml
 
 clean:
-	rm -f *.o hashjson
+	rm -f *.o hashjson hashyaml
 
 hashjson: cko_types.o hashjson.o cko_stomach.o
 	gcc $(CFLAGS) -o hashjson hashjson.c cko_types.o cko_stomach.o -lssl -lcrypto -lz -lpthread -ldl
