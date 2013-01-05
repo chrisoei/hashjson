@@ -8,6 +8,7 @@ end
 
 desc "build"
 task :build do
+  puts `cd src ; make clean ; make`
 end
 
 desc "test"
