@@ -18,6 +18,9 @@ task :test => :build do
     r = YAML.load_file("test_vectors/vector#{n}.yml")
     r['version'] = "hashjson-#{version_tag}"
     raise "Mismatch" unless r == j
+    y = YAML.load(`./src/hashyaml test_vectors/vector#{n}.dat`)
+    r['version'] = "hashyaml-#{version_tag}"
+    raise "Mismatch" unless r == y
   end
 end
 
