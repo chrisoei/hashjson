@@ -22,6 +22,7 @@ void cko_types_test();
 #include <openssl/ripemd.h>
 #include <openssl/sha.h>
 #include <zlib.h>
+#include "keccak.h"
 
 typedef struct {
   char* filename;
@@ -31,6 +32,7 @@ typedef struct {
   SHA256_CTX sha256_ctx;
   SHA512_CTX sha512_ctx;
   RIPEMD160_CTX ripemd160_ctx;
+  tKeccakLane sha3_256_ctx[5*5];
   cko_u32 adler32;
   cko_u32 crc32;
   cko_u64 size;
@@ -41,6 +43,7 @@ typedef struct {
   char hex_sha256[64+1];
   char hex_sha512[128+1];
   char hex_ripemd160[40+1];
+  char hex_sha3_256[64+1];
 } cko_multidigest_t,*cko_multidigest_ptr;
 
 void cko_multidigest_init(cko_multidigest_ptr x);

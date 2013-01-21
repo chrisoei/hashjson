@@ -10,6 +10,7 @@ void cko_multidigest_print_yaml(cko_multidigest_ptr x) {
   printf("sha256: '%s'\n",x->hex_sha256);
   printf("sha512: '%s'\n",x->hex_sha512);
   printf("ripemd160: '%s'\n",x->hex_ripemd160);
+  printf("sha3-256: '%s'\n",x->hex_sha3_256);
   printf("size: '%llu'\n",x->size);
   printf("version: 'hashyaml-%s'\n", HASHJSON_VERSION);
 }
