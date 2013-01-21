@@ -64,7 +64,7 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   cko_u8 d_sha256[32];
   cko_u8 d_sha512[64];
   cko_u8 d_ripemd160[160/8];
-  cko_u8 d_sha3_256[128];
+  cko_u8 d_sha3_256[32];
   int i;
   int len;
   static const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

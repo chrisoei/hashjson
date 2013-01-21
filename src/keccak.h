@@ -1,3 +1,4 @@
+#define cKeccakFixedOutputLengthInBytes 32
 #define cKeccakB    1600
 #define cKeccakR    1088
 
