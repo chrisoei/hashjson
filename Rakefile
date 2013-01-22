@@ -50,7 +50,8 @@ file 'test_vectors/vector6.dat' do
 end
 
 desc "build"
-task :build => [ 'hashjson', 'hashyaml', 'test_vectors/vector5.dat' ]
+task :build => [ 'hashjson', 'hashyaml', 'test_vectors/vector5.dat',
+  'test_vectors/vector6.dat' ]
 
 task :clean do
   sh %{ rm -f hashjson hashyaml }
@@ -58,7 +59,7 @@ end
 
 desc "test"
 task :test => :build do
-  (1..5).each do |n|
+  (1..6).each do |n|
     j = JSON.parse(`./hashjson test_vectors/vector#{n}.dat`)
     r = YAML.load_file("test_vectors/vector#{n}.yml")
     r['version'] = "hashjson-#{version_tag}"
