@@ -8,8 +8,8 @@ void cko_multidigest_print_json(cko_multidigest_ptr x) {
   printf("\n  \"crc32\": \"%s\",",x->hex_crc32);
   printf("\n  \"md5\": \"%s\",",x->hex_md5);
   printf("\n  \"sha1\": \"%s\",",x->hex_sha1);
-  printf("\n  \"sha256\": \"%s\",",x->hex_sha256);
-  printf("\n  \"sha512\": \"%s\",",x->hex_sha512);
+  printf("\n  \"sha2-256\": \"%s\",",x->hex_sha256);
+  printf("\n  \"sha2-512\": \"%s\",",x->hex_sha512);
   printf("\n  \"ripemd160\": \"%s\",",x->hex_ripemd160);
   printf("\n  \"sha3-256\": \"%s\",",x->hex_sha3_256);
   printf("\n  \"size\": \"%llu\",",x->size);

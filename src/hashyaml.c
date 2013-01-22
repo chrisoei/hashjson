@@ -7,8 +7,8 @@ void cko_multidigest_print_yaml(cko_multidigest_ptr x) {
   printf("crc32: '%s'\n",x->hex_crc32);
   printf("md5: '%s'\n",x->hex_md5);
   printf("sha1: '%s'\n",x->hex_sha1);
-  printf("sha256: '%s'\n",x->hex_sha256);
-  printf("sha512: '%s'\n",x->hex_sha512);
+  printf("sha2-256: '%s'\n",x->hex_sha256);
+  printf("sha2-512: '%s'\n",x->hex_sha512);
   printf("ripemd160: '%s'\n",x->hex_ripemd160);
   printf("sha3-256: '%s'\n",x->hex_sha3_256);
   printf("size: '%llu'\n",x->size);
