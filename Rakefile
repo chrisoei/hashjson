@@ -27,12 +27,12 @@ def libs
   ].join(' ')
 end
 
-file 'hashjson' => [ 'src/hashjson.c', 'src/cko_types.c', 'src/cko_stomach.c' ] do
-  sh %{ gcc #{cflags} -o hashjson src/hashjson.c src/cko_types.c src/cko_stomach.c #{libs} }
+file 'hashjson' => [ 'src/hashjson.c', 'src/cko_types.c', 'src/cko_stomach.c', 'src/keccak.c' ] do
+  sh %{ gcc #{cflags} -o hashjson src/hashjson.c src/cko_types.c src/cko_stomach.c src/keccak.c #{libs} }
 end
 
-file 'hashyaml' => [ 'src/hashyaml.c', 'src/cko_types.c', 'src/cko_stomach.c' ] do
-  sh %{ gcc #{cflags} -o hashyaml src/hashyaml.c src/cko_types.c src/cko_stomach.c #{libs} }
+file 'hashyaml' => [ 'src/hashyaml.c', 'src/cko_types.c', 'src/cko_stomach.c', 'src/keccak.c' ] do
+  sh %{ gcc #{cflags} -o hashyaml src/hashyaml.c src/cko_types.c src/cko_stomach.c src/keccak.c #{libs} }
 end
 
 desc "build"
@@ -53,6 +53,15 @@ task :test => :build do
     r['version'] = "hashyaml-#{version_tag}"
     raise "Mismatch" unless r == y
   end
+
+  j = JSON.parse(`./hashjson /dev/null`)
+  r = YAML.load_file("test_vectors/vector0.yml")
+  r['version'] = "hashjson-#{version_tag}"
+  raise "Mismatch: hashjson" unless r == j
+  y = YAML.load(`./hashyaml /dev/null`)
+  r['version'] = "hashyaml-#{version_tag}"
+  raise "Mismatch: hashyaml" unless r == y
+
   puts "All tests pass."
 end
 

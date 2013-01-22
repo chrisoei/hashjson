@@ -9,8 +9,8 @@ all: hashjson hashyaml
 clean:
 	rm -f *.o hashjson hashyaml
 
-hashjson: cko_types.o hashjson.o cko_stomach.o
-	gcc $(CFLAGS) -o hashjson hashjson.c cko_types.o cko_stomach.o -lssl -lcrypto -lz -lpthread -ldl
+hashjson: cko_types.o hashjson.o cko_stomach.o keccak.o
+	gcc $(CFLAGS) -o hashjson hashjson.c cko_types.o cko_stomach.o keccak.o -lssl -lcrypto -lz -lpthread -ldl
 
-hashyaml: cko_types.o hashyaml.o cko_stomach.o
-	gcc $(CFLAGS) -o hashyaml hashyaml.c cko_types.o cko_stomach.o -lssl -lcrypto -lz -lpthread -ldl
+hashyaml: cko_types.o hashyaml.o cko_stomach.o keccak.o
+	gcc $(CFLAGS) -o hashyaml hashyaml.c cko_types.o cko_stomach.o keccak.o -lssl -lcrypto -lz -lpthread -ldl
