@@ -36,13 +36,13 @@ file 'hashyaml' => [ 'src/hashyaml.c', 'src/cko_types.c', 'src/cko_stomach.c', '
 end
 
 file 'test_vectors/vector5.dat' do
-  File.open('test_vectors/vector5.dat', 'w:US_ASCII') do |f| 
+  File.open('test_vectors/vector5.dat', 'w:US-ASCII') do |f| 
     1000000.times { f.write('a') } 
   end
 end
 
 file 'test_vectors/vector6.dat' do
-  File.open('test_vectors/vector6.dat', 'w:US_ASCII') do |f| 
+  File.open('test_vectors/vector6.dat', 'w:US-ASCII') do |f| 
     16777216.times do
       f.write('abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno')
     end
@@ -54,7 +54,7 @@ task :build => [ 'hashjson', 'hashyaml', 'test_vectors/vector5.dat',
   'test_vectors/vector6.dat' ]
 
 task :clean do
-  sh %{ rm -f hashjson hashyaml }
+  sh %{ rm -f hashjson hashyaml test_vectors/vector{5,6}.dat }
 end
 
 desc "test"
