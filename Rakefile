@@ -35,8 +35,14 @@ file 'hashyaml' => [ 'src/hashyaml.c', 'src/cko_types.c', 'src/cko_stomach.c', '
   sh %{ gcc #{cflags} -o hashyaml src/hashyaml.c src/cko_types.c src/cko_stomach.c src/keccak.c #{libs} }
 end
 
+file 'test_vectors/vector5.dat' do
+  File.open('test_vectors/vector5.dat', 'w:US_ASCII') do |f| 
+    1000000.times { f.write('a') } 
+  end
+end
+
 desc "build"
-task :build => [ 'hashjson', 'hashyaml' ]
+task :build => [ 'hashjson', 'hashyaml', 'test_vectors/vector5.dat' ]
 
 task :clean do
   sh %{ rm -f hashjson hashyaml }
@@ -44,7 +50,7 @@ end
 
 desc "test"
 task :test => :build do
-  (1..4).each do |n|
+  (1..5).each do |n|
     j = JSON.parse(`./hashjson test_vectors/vector#{n}.dat`)
     r = YAML.load_file("test_vectors/vector#{n}.yml")
     r['version'] = "hashjson-#{version_tag}"
