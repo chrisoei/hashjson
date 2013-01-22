@@ -41,6 +41,14 @@ file 'test_vectors/vector5.dat' do
   end
 end
 
+file 'test_vectors/vector6.dat' do
+  File.open('test_vectors/vector6.dat', 'w:US_ASCII') do |f| 
+    16777216.times do
+      f.write('abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno') } 
+    end
+  end
+end
+
 desc "build"
 task :build => [ 'hashjson', 'hashyaml', 'test_vectors/vector5.dat' ]
 
