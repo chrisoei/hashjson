@@ -20,6 +20,10 @@ void cko_multidigest_file(cko_multidigest_ptr ctx) {
   FILE* fp;
   if (ctx->filename!=NULL) {
     fp=(FILE*)fopen(ctx->filename,"rb");
+    if (!fp) {
+      printf("Unable to open %s!\n",ctx->filename);
+      exit(1);
+    }
     fuzzy_hash_file(fp, ctx->ssdeep29);
     fp=(FILE*)fopen(ctx->filename,"rb");
   } else {
