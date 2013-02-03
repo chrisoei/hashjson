@@ -19,7 +19,9 @@ void cko_multidigest_init(cko_multidigest_ptr x) {
 void cko_multidigest_file(cko_multidigest_ptr ctx) {
   FILE* fp;
   if (ctx->filename!=NULL) {
-    fp=(FILE*)fopen(ctx->filename,"r");
+    fp=(FILE*)fopen(ctx->filename,"rb");
+    fuzzy_hash_file(fp, ctx->ssdeep29);
+    fp=(FILE*)fopen(ctx->filename,"rb");
   } else {
     fp=stdin;
   }

@@ -12,6 +12,7 @@ void cko_multidigest_print_json(cko_multidigest_ptr x) {
   printf("\n  \"sha2-512\": \"%s\",",x->hex_sha512);
   printf("\n  \"ripemd160\": \"%s\",",x->hex_ripemd160);
   printf("\n  \"sha3-256\": \"%s\",",x->hex_sha3_256);
+  printf("\n  \"ssdeep29\": \"%s\",",x->ssdeep29);
   printf("\n  \"size\": \"%llu\",",x->size);
   printf("\n  \"version\": \"hashjson-%s\"\n", HASHJSON_VERSION);
   printf("}\n");
