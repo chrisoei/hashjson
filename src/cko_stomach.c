@@ -27,7 +27,8 @@ void cko_multidigest_file(cko_multidigest_ptr ctx) {
     fuzzy_hash_file(fp, ctx->ssdeep29);
     fp=(FILE*)fopen(ctx->filename,"rb");
   } else {
-    fp=stdin;
+    printf("Operation not supported\n");
+    exit(2);
   }
   if (!fp) {
     printf("Unable to open %s!\n",ctx->filename);
