@@ -61,13 +61,14 @@ end
 desc "test"
 task :test => :build do
   (1..6).each do |n|
+    puts "Test ##{n}"
     j = JSON.parse(`./hashjson test_vectors/vector#{n}.dat`)
     r = YAML.load_file("test_vectors/vector#{n}.yml")
     r['version'] = "hashjson-#{version_tag}"
     raise "Mismatch" unless r == j
     y = YAML.load(`./hashyaml test_vectors/vector#{n}.dat`)
     r['version'] = "hashyaml-#{version_tag}"
-    raise "Mismatch" unless r == y
+    raise "Mismatch: #{r.inspect} #{y.inspect}" unless r == y
   end
 
   j = JSON.parse(`./hashjson /dev/null`)
