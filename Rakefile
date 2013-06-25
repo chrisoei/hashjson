@@ -21,7 +21,6 @@ def libs
   [
     '-lssl',
     '-lcrypto',
-    '-lfuzzy',
     '-lz',
     '-lpthread',
     '-ldl'
