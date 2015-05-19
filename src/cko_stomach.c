@@ -3,7 +3,6 @@
 
 void cko_multidigest_init(cko_multidigest_ptr x) {
   void crcFastInit();
-  x->filename=NULL;
   x->chunksize=1024*1024;
   x->size=0;
   MD5_Init(&(x->md5_ctx));
@@ -17,22 +16,6 @@ void cko_multidigest_init(cko_multidigest_ptr x) {
 }
 
 void cko_multidigest_file(cko_multidigest_ptr ctx) {
-  FILE* fp;
-  if (ctx->filename!=NULL) {
-    fp=(FILE*)fopen(ctx->filename,"rb");
-    if (!fp) {
-      printf("Unable to open %s!\n",ctx->filename);
-      exit(1);
-    }
-    fp=(FILE*)fopen(ctx->filename,"rb");
-  } else {
-    printf("Operation not supported\n");
-    exit(2);
-  }
-  if (!fp) {
-    printf("Unable to open %s!\n",ctx->filename);
-    exit(1);
-  }
   cko_u64 nbytes;
   unsigned char* dat;
   dat=(unsigned char*) malloc(ctx->chunksize);
@@ -40,11 +23,11 @@ void cko_multidigest_file(cko_multidigest_ptr ctx) {
     printf("Unable to malloc data buffer with size=%d\n",ctx->chunksize);
     exit(2);
   }
-  while((nbytes=fread(dat,1,ctx->chunksize,fp))>0) {
+  while((nbytes=fread(dat,1,ctx->chunksize,stdin))>0) {
     cko_multidigest_update(ctx,dat,nbytes);
+    fwrite(dat, 1, nbytes, stdout);
   }
   cko_multidigest_final(ctx);
-  fclose(fp);
   free(dat);
 }
 
@@ -111,3 +94,5 @@ void cko_multidigest_final(cko_multidigest_ptr x) {
   x->hex_ripemd160[40] = '\0';
   x->hex_sha3_256[64] = '\0';
 }
+
+// vim: expandtab nocompatible shiftwidth=2 softtabstop=2 tabstop=2

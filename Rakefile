@@ -31,9 +31,9 @@ file 'hashjson' => [ 'src/hashjson.c', 'src/cko_types.c', 'src/cko_stomach.c', '
   sh %{ gcc #{cflags} -o hashjson src/hashjson.c src/cko_types.c src/cko_stomach.c src/keccak.c #{libs} }
 end
 
-file 'hashyaml' => [ 'src/hashyaml.c', 'src/cko_types.c', 'src/cko_stomach.c', 'src/keccak.c' ] do
-  sh %{ gcc #{cflags} -o hashyaml src/hashyaml.c src/cko_types.c src/cko_stomach.c src/keccak.c #{libs} }
-end
+#file 'hashyaml' => [ 'src/hashyaml.c', 'src/cko_types.c', 'src/cko_stomach.c', 'src/keccak.c' ] do
+#  sh %{ gcc #{cflags} -o hashyaml src/hashyaml.c src/cko_types.c src/cko_stomach.c src/keccak.c #{libs} }
+#end
 
 file 'test_vectors/vector5.dat' do
   File.open('test_vectors/vector5.dat', 'w:US-ASCII') do |f| 
@@ -50,7 +50,7 @@ file 'test_vectors/vector6.dat' do
 end
 
 desc "build"
-task :build => [ 'hashjson', 'hashyaml', 'test_vectors/vector5.dat',
+task :build => [ 'hashjson', 'test_vectors/vector5.dat',
   'test_vectors/vector6.dat' ]
 
 task :clean do

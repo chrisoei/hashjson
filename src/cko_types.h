@@ -25,7 +25,6 @@ void cko_types_test();
 #include "keccak.h"
 
 typedef struct {
-  char* filename;
   cko_u32 chunksize;
   MD5_CTX md5_ctx;
   SHA_CTX sha1_ctx;
