@@ -22,7 +22,6 @@ void cko_types_test();
 #include <openssl/ripemd.h>
 #include <openssl/sha.h>
 #include <zlib.h>
-#include "keccak.h"
 
 typedef struct {
   cko_u32 chunksize;
@@ -31,7 +30,6 @@ typedef struct {
   SHA256_CTX sha256_ctx;
   SHA512_CTX sha512_ctx;
   RIPEMD160_CTX ripemd160_ctx;
-  SHA3_256_CTX sha3_256_ctx;
   cko_u32 adler32;
   cko_u32 crc32;
   cko_u64 size;

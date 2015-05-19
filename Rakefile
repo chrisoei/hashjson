@@ -27,8 +27,8 @@ def libs
   ].join(' ')
 end
 
-file 'hashjson' => [ 'src/hashjson.c', 'src/cko_types.c', 'src/cko_stomach.c', 'src/keccak.c' ] do
-  sh %{ gcc #{cflags} -o hashjson src/hashjson.c src/cko_types.c src/cko_stomach.c src/keccak.c #{libs} }
+file 'hashjson' => [ 'src/hashjson.c', 'src/cko_types.c', 'src/cko_stomach.c' ] do
+  sh %{ gcc #{cflags} -o hashjson src/hashjson.c src/cko_types.c src/cko_stomach.c #{libs} }
 end
 
 #file 'hashyaml' => [ 'src/hashyaml.c', 'src/cko_types.c', 'src/cko_stomach.c', 'src/keccak.c' ] do

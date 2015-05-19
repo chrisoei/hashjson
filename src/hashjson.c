@@ -11,7 +11,6 @@ void cko_multidigest_print_json(cko_multidigest_ptr x) {
   fprintf(stderr, "\n  \"sha2-256\": \"%s\",",x->hex_sha256);
   fprintf(stderr, "\n  \"sha2-512\": \"%s\",",x->hex_sha512);
   fprintf(stderr, "\n  \"ripemd160\": \"%s\",",x->hex_ripemd160);
-  fprintf(stderr, "\n  \"sha3-256\": \"%s\",",x->hex_sha3_256);
   fprintf(stderr, "\n  \"size\": \"%llu\",",x->size);
   fprintf(stderr, "\n  \"version\": \"hashjson-%s\"\n", HASHJSON_VERSION);
   fprintf(stderr, "}\n");
